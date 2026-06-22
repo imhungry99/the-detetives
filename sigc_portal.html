@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIGC — Sistema Integrado de Gestão de Casos | DIF Brasil</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a1628;--bg2:#111f38;--bg3:#162b4a;--bg4:#1c3358;
+  --gold:#c9a84c;--gold2:#e8c97a;
+  --red:#b03030;--red2:rgba(139,0,0,.85);
+  --green:#1e6644;--green2:#2ecc71;
+  --text:#d8d0c0;--text2:#a09070;--text3:#60503a;
+  --border:rgba(201,168,76,.22);--border2:rgba(255,255,255,.06);
+  --sw:260px;--hh:62px;
+}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;font-size:14px;background:var(--bg);color:var(--text);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px;}
+
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;}
+.ls-seal{width:86px;height:86px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:18px;flex-shrink:0;}
+.ls-seal::before{content:'';position:absolute;inset:5px;border-radius:50%;border:1px solid rgba(201,168,76,.3);}
+.ls-seal svg{width:40px;height:40px;fill:var(--gold);}
+.ls-box{width:340px;max-width:92vw;background:var(--bg2);border:1px solid var(--border);padding:30px 28px;border-radius:3px;}
+.ls-agency{text-align:center;font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;}
+.ls-title{text-align:center;font-size:22px;font-weight:700;color:var(--text);letter-spacing:2px;margin-bottom:2px;}
+.ls-sub{text-align:center;font-size:10px;color:var(--text3);letter-spacing:2px;margin-bottom:28px;text-transform:uppercase;}
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:9px;letter-spacing:2px;color:var(--text2);text-transform:uppercase;margin-bottom:5px;}
+.fg input{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 12px;font-size:13px;font-family:monospace;outline:none;border-radius:2px;transition:border .2s;}
+.fg input:focus{border-color:var(--gold);}
+.btn-login{width:100%;background:var(--gold);color:#080e18;border:none;padding:11px;font-size:11px;letter-spacing:2px;font-weight:700;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .2s;}
+.btn-login:hover{background:var(--gold2);}
+.ls-err{min-height:18px;color:var(--red);font-size:11px;margin-top:8px;text-align:center;}
+.ls-footer{margin-top:20px;text-align:center;font-size:9px;color:var(--text3);letter-spacing:.5px;}
+
+/* ── APP ── */
+#app{display:none;flex-direction:column;height:100vh;}
+
+/* ── HEADER ── */
+header{height:var(--hh);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0;z-index:10;}
+.h-left{display:flex;align-items:center;gap:14px;}
+.h-seal{width:34px;height:34px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.h-seal svg{width:17px;height:17px;fill:var(--gold);}
+.h-brand .agency{font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
+.h-brand .system{font-size:13px;font-weight:700;letter-spacing:1px;}
+.h-case{padding:5px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:2px;}
+.h-case .cn{font-size:8px;letter-spacing:2px;color:var(--text2);text-transform:uppercase;}
+.h-case .cs{font-size:11px;color:var(--gold);font-weight:700;letter-spacing:.5px;}
+.h-right{display:flex;align-items:center;gap:14px;}
+.classified{padding:3px 9px;background:var(--red2);border:1px solid var(--red);font-size:8px;letter-spacing:2px;color:#ff8888;text-transform:uppercase;animation:blink 2.2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}55%{opacity:.45;};}
+.h-agent{font-size:10px;color:var(--text2);text-align:right;}
+.h-agent strong{display:block;font-size:11px;color:var(--text);}
+.btn-out{background:none;border:1px solid var(--border2);color:var(--text3);padding:5px 11px;font-size:9px;letter-spacing:1px;cursor:pointer;text-transform:uppercase;border-radius:2px;transition:all .2s;}
+.btn-out:hover{border-color:var(--red);color:var(--red);}
+
+/* ── LAYOUT ── */
+.layout{display:flex;flex:1;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+aside{width:var(--sw);background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column;}
+.sb-sec{padding:6px 0;border-bottom:1px solid var(--border2);}
+.sb-title{padding:8px 18px 3px;font-size:8px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;}
+.nav{display:flex;align-items:center;gap:9px;padding:8px 18px;cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s;border-left:2px solid transparent;user-select:none;}
+.nav:hover{background:var(--bg3);color:var(--text);}
+.nav.active{background:rgba(201,168,76,.1);color:var(--gold);border-left-color:var(--gold);}
+.nav .ic{font-size:13px;width:16px;text-align:center;flex-shrink:0;}
+.nav-lk{margin-left:auto;font-size:8px;padding:2px 5px;background:rgba(139,0,0,.6);color:#ff9090;letter-spacing:1px;border-radius:1px;flex-shrink:0;}
+.nav-lk.on{background:var(--green);color:#80ffb0;}
+
+/* ── MAIN ── */
+main{flex:1;overflow-y:auto;padding:26px 30px;}
+
+/* ── SECTION ── */
+.sh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.sh-title{font-size:17px;font-weight:700;}
+.sh-sub{font-size:11px;color:var(--text3);margin-top:3px;letter-spacing:.5px;}
+.badge{padding:4px 10px;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;border-radius:2px;flex-shrink:0;}
+.badge-r{background:rgba(176,48,48,.2);border:1px solid var(--red);color:#ff8080;}
+.badge-g{background:rgba(30,102,68,.3);border:1px solid var(--green2);color:var(--green2);}
+.badge-y{background:rgba(201,168,76,.15);border:1px solid var(--gold);color:var(--gold);}
+
+/* ── CARD ── */
+.card{background:var(--bg2);border:1px solid var(--border2);border-radius:2px;padding:18px 20px;margin-bottom:16px;}
+.ch{font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.ch::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+
+/* ── STAT ── */
+.stat{background:var(--bg2);border:1px solid var(--border2);padding:14px 16px;text-align:center;border-radius:2px;}
+.snum{font-size:30px;font-weight:700;color:var(--gold);font-family:monospace;line-height:1;margin-bottom:3px;}
+.slabel{font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;}
+
+/* ── PROFILE CARD ── */
+.pc{background:var(--bg2);border:1px solid var(--border2);border-radius:2px;overflow:hidden;}
+.pc-img{width:100%;height:190px;object-fit:cover;object-position:top;display:block;filter:contrast(1.04) saturate(.92);}
+.pc-ph{width:100%;height:190px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:40px;}
+.pc-info{padding:14px 16px;}
+.pc-name{font-size:14px;font-weight:700;margin-bottom:2px;}
+.pc-role{font-size:9px;letter-spacing:1px;color:var(--text2);text-transform:uppercase;margin-bottom:10px;}
+.meta{font-size:12px;color:var(--text2);line-height:1.85;}
+.meta strong{color:var(--text);font-size:11px;}
+.sb2{display:inline-block;padding:3px 8px;font-size:8px;letter-spacing:2px;text-transform:uppercase;font-weight:700;border-radius:1px;margin-top:8px;}
+.miss{background:rgba(176,48,48,.2);border:1px solid var(--red);color:#ff8080;}
+.susp{background:rgba(200,100,0,.2);border:1px solid #c96400;color:#ffa060;}
+.witn{background:rgba(201,168,76,.15);border:1px solid var(--gold);color:var(--gold);}
+.intr{background:rgba(180,60,60,.25);border:1px solid #c04040;color:#ff9090;}
+
+/* ── EVIDENCE TABLE ── */
+.etbl{width:100%;border-collapse:collapse;}
+.etbl th{background:var(--bg3);padding:7px 11px;text-align:left;font-size:9px;letter-spacing:1.5px;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border);}
+.etbl td{padding:9px 11px;border-bottom:1px solid var(--border2);font-size:11px;vertical-align:top;}
+.etbl tr:hover td{background:rgba(255,255,255,.015);}
+.eid{font-family:monospace;color:var(--gold);font-size:10px;}
+
+/* ── TIMELINE ── */
+.tl{position:relative;padding-left:26px;}
+.tl::before{content:'';position:absolute;left:8px;top:8px;bottom:8px;width:2px;background:var(--border);}
+.tle{position:relative;margin-bottom:18px;}
+.tld{position:absolute;left:-22px;top:5px;width:11px;height:11px;border-radius:50%;background:var(--bg3);border:2px solid var(--gold);}
+.tld.red{border-color:var(--red);}
+.tld.lk{border-color:var(--text3);}
+.tl-time{font-size:9px;color:var(--gold);letter-spacing:1px;margin-bottom:2px;font-family:monospace;}
+.tl-txt{font-size:13px;line-height:1.45;}
+.tl-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+
+/* ── PHASE LOCK ── */
+.phlock{text-align:center;padding:56px 28px;background:var(--bg2);border:1px solid var(--border);border-radius:2px;max-width:460px;margin:0 auto;}
+.phlock h2{font-size:13px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
+.phlock p{font-size:12px;color:var(--text2);margin-bottom:22px;line-height:1.65;}
+.phlock input{width:100%;max-width:270px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:11px 14px;font-size:13px;font-family:monospace;letter-spacing:3px;text-align:center;outline:none;text-transform:uppercase;border-radius:2px;transition:border .2s;}
+.phlock input:focus{border-color:var(--gold);}
+.btn-ul{display:block;width:100%;max-width:270px;background:var(--gold);color:#070d18;border:none;padding:11px;font-size:10px;letter-spacing:2px;font-weight:700;text-transform:uppercase;cursor:pointer;margin:10px auto 0;border-radius:2px;transition:background .2s;}
+.btn-ul:hover{background:var(--gold2);}
+.ul-hint{font-size:10px;color:var(--text3);margin-top:14px;cursor:pointer;text-decoration:underline;}
+.ul-hint:hover{color:var(--text2);}
+.ul-err{min-height:16px;font-size:11px;margin-top:8px;}
+
+/* ── COMMUNICATIONS ── */
+.comm{background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--gold);padding:14px 18px;margin-bottom:12px;border-radius:2px;}
+.comm-meta{font-size:9px;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:7px;display:flex;gap:14px;flex-wrap:wrap;}
+.comm-subj{font-size:13px;font-weight:600;margin-bottom:7px;}
+.comm-body{font-size:12px;color:var(--text2);line-height:1.75;white-space:pre-line;}
+
+/* ── STATEMENT ── */
+.stmt{background:var(--bg3);border-left:3px solid var(--border);padding:12px 16px;margin:10px 0;border-radius:2px;font-size:12px;color:var(--text2);line-height:1.75;font-style:italic;}
+.stmt cite{display:block;margin-top:7px;font-style:normal;font-size:9px;letter-spacing:1px;color:var(--text3);text-transform:uppercase;}
+
+/* ── PHONE LOG ── */
+.plog{background:var(--bg);border:1px solid var(--border2);font-family:monospace;font-size:11px;color:var(--text2);padding:14px;overflow-x:auto;border-radius:2px;}
+.plog .pl{display:flex;gap:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.025);}
+.plog .pt{color:var(--gold);width:110px;flex-shrink:0;}
+.plog .pn{width:170px;flex-shrink:0;}
+.plog .ph{background:rgba(176,48,48,.12);color:#ffaaaa;}
+
+/* ── WHATSAPP ── */
+.wa{background:linear-gradient(160deg,#111f22,#0d1a1c);border:1px solid var(--border2);padding:14px;border-radius:4px;max-height:420px;overflow-y:auto;}
+.wa-hdr{text-align:center;font-size:10px;color:var(--text3);padding:0 0 12px;border-bottom:1px solid var(--border2);margin-bottom:14px;}
+.wam{margin-bottom:10px;}
+.wam.s{text-align:right;}
+.wab{display:inline-block;padding:7px 12px;font-size:12px;line-height:1.5;max-width:80%;border-radius:4px;}
+.wam.r .wab{background:#1e3d2e;color:#b8f0c8;}
+.wam.s .wab{background:#1a3060;color:#a8c0f0;}
+.wat{font-size:9px;color:var(--text3);margin-top:2px;}
+
+/* ── CLASSIFIED BLOCK ── */
+.clsblk{background:rgba(139,0,0,.12);border:1px solid rgba(176,48,48,.35);padding:14px 18px;margin:10px 0;border-radius:2px;}
+.clsblk .cll{font-size:8px;letter-spacing:3px;color:var(--red);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.clsblk .enc{font-family:monospace;font-size:10px;color:rgba(255,255,255,.42);word-break:break-all;line-height:1.85;background:var(--bg);padding:10px;border-radius:2px;}
+
+/* ── DOC HEADER ── */
+.doch{background:var(--bg3);border:1px solid var(--border);padding:18px;margin-bottom:14px;border-radius:2px;}
+.docs{font-size:8px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;}
+.doct{font-size:15px;font-weight:700;margin-bottom:8px;}
+.docm{display:flex;gap:20px;font-size:11px;color:var(--text2);flex-wrap:wrap;}
+.docm span strong{color:var(--text);}
+
+/* ── MISC ── */
+.note{padding:10px 14px;background:rgba(201,168,76,.08);border-left:2px solid var(--gold);font-size:12px;color:var(--text2);border-radius:2px;margin-top:10px;}
+.note-r{padding:10px 14px;background:rgba(176,48,48,.1);border:1px solid rgba(176,48,48,.3);font-size:12px;color:#ffaaaa;border-radius:2px;margin-top:10px;}
+.sep{height:1px;background:var(--border);margin:18px 0;}
+
+@media(max-width:860px){:root{--sw:210px;}.g3{grid-template-columns:1fr 1fr;}main{padding:18px 18px;}}
+@media(max-width:640px){:root{--sw:0px;}aside{display:none;}header{padding:0 12px;}.h-case,.classified{display:none;}.g2,.g3{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- ══════ LOGIN ══════ -->
+<div id="login-screen">
+  <div class="ls-seal">
+    <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+  </div>
+  <div class="ls-box">
+    <p class="ls-agency">Departamento de Investigação Federal — Brasil</p>
+    <h1 class="ls-title">SIGC</h1>
+    <p class="ls-sub">Sistema Integrado de Gestão de Casos</p>
+    <div class="fg">
+      <label for="lu">Identificação do Agente</label>
+      <input type="text" id="lu" value="investigador" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="fg">
+      <label for="lp">Código de Acesso</label>
+      <input type="password" id="lp" placeholder="••••••••" autocomplete="off">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Acessar Sistema</button>
+    <p class="ls-err" id="lerr"></p>
+    <p class="ls-footer">Acesso não autorizado é crime federal — Art. 154-A do Código Penal</p>
+  </div>
+</div>
+
+<!-- ══════ APP ══════ -->
+<div id="app" style="display:none;flex-direction:column;height:100vh;">
+
+  <header>
+    <div class="h-left">
+      <div class="h-seal"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div>
+      <div class="h-brand">
+        <div class="agency">Departamento de Investigação Federal — Brasil</div>
+        <div class="system">SIGC — Sistema Integrado de Gestão de Casos</div>
+      </div>
+      <div class="h-case">
+        <div class="cn">Caso Ativo</div>
+        <div class="cs">Nº 2025-0847-VDC &rsaquo; EM ANDAMENTO</div>
+      </div>
+    </div>
+    <div class="h-right">
+      <div class="classified">Confidencial</div>
+      <div class="h-agent"><strong>Ag. Investigador</strong>Credencial: INV-2025</div>
+      <button class="btn-out" onclick="doLogout()">Encerrar</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <div class="sb-sec">
+        <div class="sb-title">Navegação</div>
+        <div class="nav active" data-s="dashboard" onclick="nav(this,'dashboard')"><span class="ic">◈</span>Painel Principal</div>
+        <div class="nav" data-s="timeline" onclick="nav(this,'timeline')"><span class="ic">◷</span>Linha do Tempo</div>
+        <div class="nav" data-s="comunicados" onclick="nav(this,'comunicados')"><span class="ic">✉</span>Comunicados</div>
+      </div>
+      <div class="sb-sec">
+        <div class="sb-title">Caso 2025-0847</div>
+        <div class="nav" data-s="overview" onclick="nav(this,'overview')"><span class="ic">◉</span>Visão Geral</div>
+        <div class="nav" data-s="vitima" onclick="nav(this,'vitima')"><span class="ic">◌</span>Vítima</div>
+        <div class="nav" data-s="suspeitos" onclick="nav(this,'suspeitos')"><span class="ic">⚑</span>Suspeitos</div>
+        <div class="nav" data-s="testemunhas" onclick="nav(this,'testemunhas')"><span class="ic">◎</span>Testemunhas</div>
+        <div class="nav" data-s="evidencias" onclick="nav(this,'evidencias')"><span class="ic">◆</span>Evidências</div>
+      </div>
+      <div class="sb-sec">
+        <div class="sb-title">Arquivos Restritos</div>
+        <div class="nav" data-s="fase1" onclick="nav(this,'fase1')"><span class="ic">🔓</span>Fase 1<span class="nav-lk on" id="lk1">ATIVO</span></div>
+        <div class="nav" data-s="fase2" onclick="nav(this,'fase2')"><span class="ic">🔒</span>Fase 2<span class="nav-lk" id="lk2">BLOQ.</span></div>
+        <div class="nav" data-s="fase3" onclick="nav(this,'fase3')"><span class="ic">🔒</span>Fase 3<span class="nav-lk" id="lk3">BLOQ.</span></div>
+        <div class="nav" data-s="fase4" onclick="nav(this,'fase4')"><span class="ic">🔒</span>Fase 4<span class="nav-lk" id="lk4">BLOQ.</span></div>
+      </div>
+    </aside>
+    <main id="mc"></main>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// SENHAS — Guia do Game Master (não leia se quiser jogar sem spoiler de setup)
+// Login: SIGC2025
+// Fase 2: IRISMARCO   → escondida no depoimento físico de Marcos (Dia 3)
+// Fase 3: MERIDIONAL  → escondida nos documentos financeiros (Dia 4)
+// Fase 4: VALENTINAVIVE → escondida nas notas da Fase 3 (Dia 6)
+// ═══════════════════════════════════════════════════
+
+const PW={login:'SIGC2025',p2:'IRISMARCO',p3:'MERIDIONAL',p4:'VALENTINAVIVE'};
+const ST={phases:new Set([1]),sec:'dashboard'};
+
+function enc64(s){try{return btoa(unescape(encodeURIComponent(s)));}catch(e){return btoa(s);}}
+
+// ─── DADOS CASO ───────────────────────────────────
+const CASE={
+  num:'2025-0847-VDC',opened:'10/03/2025',updated:'17/03/2025',
+  priority:'PRIORIDADE ALPHA',
+  delegacia:'3ª Delegacia de Polícia — Serrano/RS',
+  agents:'Ag. Fed. Rodrigo Assumpção  /  Del. Ana Paula Xerez'
+};
+
+const VICTIM={
+  name:'Valentina Delgado Carmo',dob:'14/06/1996',age:28,
+  occ:'Designer Gráfica — Freelancer & Tavares Arquitetura e Design Ltda.',
+  addr:'Rua das Acácias, 347, Apto 82 — Bairro Floresta, Serrano/RS',
+  phone:'(54) 99847-2231',ig:'@valentina.carmo.design',
+  hair:'Castanho escuro, liso, comprimento médio (até os ombros)',
+  eyes:'Castanhos claros',height:'1,67m',weight:'56kg',
+  lastSeen:'07/03/2025, aprox. 23h17',
+  lastWhere:'Bar do Conselho — R. Barão do Rio Branco, 112 — Centro',
+  roupa:'Vestido midi de renda preta (não reconhecido pela família), salto alto preto',
+  photo:'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&h=400&fit=crop&crop=face'
+};
+
+const SUSPECTS=[
+  {id:'S01',name:'Rafael Augusto Menezes',dob:'22/09/1993',age:31,
+   occ:'Desenvolvedor de Software — StartupTech Serrano Ltda.',
+   addr:'Av. Independência, 2240, Apto 54 — Serrano/RS',phone:'(54) 99672-8834',
+   rel:'Ex-namorado da vítima. Término em novembro/2024.',
+   status:'PESSOA DE INTERESSE',scls:'intr',phase:1,
+   photo:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop&crop=face',
+   notes:'Enviou mensagens frequentes para a vítima após o término. Identificado por câmera próximo ao apartamento da vítima em 04/03/2025. Alibi parcial fornecido por André Leal — não corroborado. Detalhes completos liberados na FASE 2.'},
+  {id:'S02',name:'Lucas Renato Tavares',dob:'03/11/1986',age:38,
+   occ:'Arquiteto — Sócio-Proprietário, Tavares Arquitetura & Design Ltda.',
+   addr:'R. das Magnólias, 88 — Bairro Alto da Serra, Serrano/RS',phone:'(54) 99341-7700',
+   rel:'Empregador da vítima (14 meses). Relação afetiva investigada.',
+   status:'SUSPEITO',scls:'susp',phase:3,
+   photo:'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=400&fit=crop&crop=face',
+   notes:'[CLASSIFICADO — PERFIL COMPLETO LIBERADO NA FASE 3]'}
+];
+
+const WITNESSES=[
+  {id:'W01',name:'Beatriz "Bia" Carmo',dob:'21/08/2000',age:24,
+   occ:'Estudante de Psicologia — UNISC',
+   addr:'R. das Acácias, 512 — Bairro Floresta, Serrano/RS',
+   rel:'Irmã da vítima. Registrou o BO.',phase:1,
+   photo:'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=400&fit=crop&crop=face',
+   stmt:'Tentei ligar para minha irmã no sábado de manhã. Ela sempre me manda mensagem — é impossível ficar um dia sem falar. Fui ao apartamento na segunda. A bolsa dela estava lá. O celular na cama, descarregado. O laptop aberto. As plantas tinham sido regadas na véspera. Ela estava com planos. Valentina não ia embora sem me avisar. Alguém fez alguma coisa com ela.'},
+  {id:'W02',name:'Lucinda Ferreira ("Dona Cida")',dob:'12/04/1957',age:67,
+   occ:'Aposentada',addr:'R. das Acácias, 347, Apto 84 — Bairro Floresta',
+   rel:'Vizinha da vítima — Apto 84',phase:1,
+   photo:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=400&fit=crop&crop=face',
+   stmt:'Vi a Valentina saindo na tarde de sexta, uns quatro da tarde. Ela estava arrumada diferente — com um vestido que eu nunca tinha visto nela, mais elegante. Perguntei se estava em alguma festa, ela sorriu e disse: "algo assim, Dona Cida." Parecia animada, quase ansiosa. Eu não a vi chegar naquela noite.'},
+  {id:'W03',name:'Marcos Henrique Fontes',dob:'08/11/1993',age:31,
+   occ:'Designer Gráfico — Freelancer',
+   addr:'R. Sete de Setembro, 340, Casa 3 — Serrano/RS',
+   rel:'Colega de trabalho e amigo próximo da vítima',phase:2,
+   photo:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=400&fit=crop&crop=face',
+   stmt:'Eu precisava falar isso. A Val estava assustada na semana passada. Não com o Rafael — ela achava ele chato, irritante, mas sem medo real. Era outra coisa. Na quarta-feira ela me disse: "Marcos, se alguma coisa me acontecer, olha nos meus arquivos de trabalho. Tem uma pasta chamada Projeto X." Eu achei que ela estava exagerando. Não estava. Me perdoa, Val.'},
+  {id:'W04',name:'Daniela Cristina Tavares',dob:'17/02/1987',age:38,
+   occ:'Professora de Artes — E.E. João XXIII',
+   addr:'R. das Magnólias, 88 — Bairro Alto da Serra, Serrano/RS',
+   rel:'Esposa de Lucas Tavares',phase:4,
+   photo:'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=400&fit=crop&crop=face',
+   stmt:'Eu sabia do caso deles. Não sou idiota. Mas o que eu não sabia é que o Lucas estava envolvido com essas pessoas. Na quinta-feira, dois dias antes da Valentina desaparecer, ouvi ele falando no telefone: "Ela tem tudo, Henrique. Tudo. Preciso resolver isso antes do fim de semana." Eu não entendi na hora. Entendo agora. E não vou protegê-lo dessa vez.'}
+];
+
+const EVIDENCE=[
+  {id:'EVID-001',type:'Objeto Pessoal',date:'10/03',ph:1,desc:'Bolsa pessoal da vítima (clutch marrom)',
+   detail:'Encontrada sobre o balcão da cozinha, Apto 82. Continha: carteira (R$87), batom, chave do apartamento. Ausência do celular — incomum, segundo familiares ela nunca saía sem ele.'},
+  {id:'EVID-002',type:'Eletrônico',date:'10/03',ph:1,desc:'Celular da vítima — iPhone 14 Preto',
+   detail:'Encontrado na cama, completamente descarregado. Bloqueado por Face ID. Encaminhado à Perícia Digital. Registros de chamadas obtidos via operadora (mandado judicial) — disponíveis na FASE 2.'},
+  {id:'EVID-003',type:'Eletrônico',date:'10/03',ph:1,desc:'Laptop da vítima — MacBook Air M2',
+   detail:'Aberto sobre a escrivaninha, em modo espera. Arquivo de design "Café Serenidade — Identidade Visual v3" na tela. Pasta "Projeto X" detectada, protegida por senha AES-256. Em extração forense.'},
+  {id:'EVID-004',type:'Registro Visual',date:'11/03',ph:1,desc:'CCTV — Bar do Conselho (câmera externa)',
+   detail:'22h48: Valentina entra. 23h06: homem não identificado entra (alto, ~40 anos, terno cinza escuro, cabelo com grisalho). 23h17: saem juntos em direção à R. Borges de Medeiros. Valentina aparenta calma. Análise facial em andamento.'},
+  {id:'EVID-005',type:'Registro Digital',date:'11/03',ph:2,desc:'Registros de chamadas — 7 dias anteriores'},
+  {id:'EVID-006',type:'Registro Digital',date:'12/03',ph:2,desc:'Exportação WhatsApp — Rafael Menezes → Vítima'},
+  {id:'EVID-007',type:'Doc. Financeiro',date:'13/03',ph:3,desc:'Extrato bancário — Banco Meridional'},
+  {id:'EVID-008',type:'Registro Visual',date:'14/03',ph:3,desc:'CCTV expandido — identificação de suspeito'},
+  {id:'EVID-009',type:'Doc. Digital',date:'16/03',ph:4,desc:'Conteúdo pasta "Projeto X" — laptop vítima'},
+  {id:'EVID-010',type:'Laudo Pericial',date:'17/03',ph:4,desc:'Laudo preliminar — IML Serrano'}
+];
+
+const TL=[
+  {d:'Qua 05/03 — 14h22',t:'Valentina liga para Marcos Fontes — 8 minutos',s:'Assunto não revelado por Marcos inicialmente.',type:'n',ph:1},
+  {d:'Sex 07/03 — 16h00',t:'Última vez vista no apartamento — Dona Cida',s:'Saiu "arrumada diferente", aparentava animação e ansiedade.',type:'a',ph:1},
+  {d:'Sex 07/03 — 21h44',t:'Chamada recebida — número NÃO IDENTIFICADO (4min 52s)',s:'Número: (11) 9 7***-**** — chip pré-pago. Análise em andamento.',type:'r',ph:2},
+  {d:'Sex 07/03 — 22h15',t:'2ª chamada do mesmo número desconhecido (1min 18s)',s:'Ligação curta — possível confirmação de encontro.',type:'r',ph:2},
+  {d:'Sex 07/03 — 22h48',t:'Valentina chega ao Bar do Conselho',s:'Confirmado por CCTV externo.',type:'a',ph:1},
+  {d:'Sex 07/03 — 23h06',t:'Homem não identificado entra no Bar do Conselho',s:'Alto, ~38-45 anos, terno cinza escuro, cabelo com grisalho. Em análise facial.',type:'r',ph:1},
+  {d:'Sex 07/03 — 23h17',t:'Valentina e o homem saem juntos',s:'Direção: R. Borges de Medeiros. Valentina aparenta calma.',type:'r',ph:1},
+  {d:'Sáb 08/03 — 09h30',t:'[EVENTO RESTRITO — FASE 2]',s:'',type:'lk',ph:2},
+  {d:'Sáb 08/03 — 11h00',t:'Bia tenta contato — sem resposta',s:'7 ligações e 4 mensagens sem resposta.',type:'n',ph:1},
+  {d:'Dom 09/03 — dia inteiro',t:'Nenhum registro de atividade de Valentina Carmo',s:'Celular offline. Redes sociais inativas. Localização desconhecida.',type:'a',ph:1},
+  {d:'Seg 10/03 — 09h15',t:'Bia vai ao apartamento da irmã',s:'Encontra bolsa, celular descarregado, laptop aberto. Chama a polícia.',type:'a',ph:1},
+  {d:'Seg 10/03 — 14h32',t:'BO 2025/0847 registrado — 3ª DP Serrano',s:'Beatriz Carmo comparece presencialmente.',type:'n',ph:1},
+  {d:'Ter 11/03 — 09h00',t:'DIF assume o caso — Prioridade ALPHA',s:'Ag. Rodrigo Assumpção designado como responsável.',type:'n',ph:1},
+  {d:'Qua 12/03 — [RESTRITO]',t:'[EVENTO RESTRITO — FASE 2]',s:'',type:'lk',ph:2},
+  {d:'Qui 13/03',t:'[EVENTO RESTRITO — FASE 2]',s:'',type:'lk',ph:2},
+  {d:'Sex 14/03',t:'[EVENTO RESTRITO — FASE 3]',s:'',type:'lk',ph:3},
+  {d:'Sáb 15/03',t:'[EVENTO RESTRITO — FASE 4]',s:'',type:'lk',ph:4},
+  {d:'Dom-Seg 16-17/03',t:'[EVENTO RESTRITO — FASE 4]',s:'',type:'lk',ph:4}
+];
+
+// ─── SEGREDOS (criptografados em base64 no momento da exibição) ───
+// ATENÇÃO GAME MASTER: Não leia os textos abaixo se quiser descobrir junto.
+const SECRETS={
+projetoX:`PROJETO X — VALENTINA CARMO — NOTAS PESSOAIS
+Data das notas: 03/03/2025 e 05/03/2025
+
+[03/03]
+Lucas me mostrou os projetos "especiais" sem querer. Fiquei com o laptop dele aberto na mesa enquanto ele atendia uma ligação no corredor. Vi uma pasta: ESTRUTURAS_REAIS. Tinha plantas de galpões que não existem em nenhum dos projetos que trabalhamos juntos. E números. Muito dinheiro passando por contas que não reconheço.
+
+Pesquisei o CNPJ da empresa subsidiária que aparecia nos documentos: MERIDIONAL CONSTRUÇÕES E SERVIÇOS LTDA. Não tem nenhuma obra registrada. Nenhum funcionário além de dois administrativos. Mas tem R$4,7 milhões em movimentações bancárias no último ano.
+
+[05/03]
+Confrontei o Lucas. Perguntei o que era a Meridional. Ele ficou branco. Disse que eu não entendia o contexto, que ia me explicar tudo pessoalmente. Marcou para sexta, 23h, no Bar do Conselho.
+
+Disse pra eu não falar com ninguém até lá.
+
+Marcos: se você está lendo isso, sinto muito ter te envolvido. Não devia. O arquivo completo com os documentos escaneados está no pendrive azul — fundo da minha caixa de costura, dentro do guarda-roupa. Senha do pendrive: IRISAZUL1996.
+
+Se algo me acontecer, vai direto para a polícia. Não para o Lucas.`,
+
+laudo:`LAUDO PERICIAL PRELIMINAR — CASO 2025-0847-VDC
+Instituto Médico Legal de Serrano — RS
+Data de emissão: 17/03/2025
+Legista responsável: Dr. Fábio Mendonça — CRM/RS 48.201
+
+IDENTIFICAÇÃO:
+Nome: VALENTINA DELGADO CARMO, 28 anos
+CPF: ***.847.**/81 (ocultado por protocolo de privacidade)
+
+LOCAL DO ENCONTRO:
+Área rural — km 23 da RSC-287
+Propriedade registrada em nome de: MERIDIONAL LOGÍSTICA E ARMAZENAGEM LTDA.
+Titular do CNPJ: HENRIQUE CALDAS, 44 anos
+Descoberta por: José Amaro Ribeiro, 61 anos, agricultor da região — 15/03/2025, 07h40
+
+DATA ESTIMADA DO ÓBITO:
+Entre 08/03/2025 e 10/03/2025 (margem de 48h)
+
+CAUSA MORTIS:
+Traumatismo craniano severo por objeto contundente.
+
+OBSERVAÇÕES RELEVANTES:
+- Hematomas defensivos nos antebraços — resistência física evidenciada
+- Fragmentos de fibra têxtil (lã escura) encontrados sob as unhas
+- Solo das roupas compatível com o local do encontro
+- Sem sinais de violência sexual
+- Confirmação de identidade: DNA comparado e confirmado com Beatriz Carmo (irmã)`,
+
+conclusao:`CONCLUSÃO INVESTIGATIVA — CASO 2025-0847-VDC
+Classificação: USO ESTRITAMENTE RESTRITO — Agentes autorizados
+Data: 18/03/2025 — DIF Brasil / Delegacia Serrano-RS
+
+══════════════════════════════════════════════
+
+MANDANTE: LUCAS RENATO TAVARES, 38 anos
+Arquiteto. Sócio-proprietário, Tavares Arquitetura & Design Ltda.
+
+EXECUTOR: HENRIQUE CALDAS, 44 anos
+Empresário. Titular da Meridional Construções e Serviços Ltda.
+
+══════════════════════════════════════════════
+
+MOTIVO:
+Valentina Carmo descobriu que a empresa Tavares Arquitetura & Design funcionava como fachada para lavagem de dinheiro de uma organização criminosa regional ligada ao tráfico de entorpecentes. Ela possuía documentos digitalizados e um pendrive com evidências suficientes para incriminar ambos. Quando confrontou Lucas em 05/03, ele entendeu a dimensão da ameaça.
+
+SEQUÊNCIA DO CRIME:
+Em 07/03, Lucas convenceu Valentina a se encontrar com ele no Bar do Conselho. Convenceu-a a ir ao escritório da empresa para "mostrar os documentos e explicar tudo". Henrique Caldas estava no local aguardando. A situação escalou violentamente. O corpo foi transportado e ocultado em propriedade da Meridional Logística (empresa ligada a Caldas), km 23 da RSC-287.
+
+══════════════════════════════════════════════
+
+SOBRE RAFAEL MENEZES:
+INOCENTADO COMPLETAMENTE.
+Suas mensagens eram de um ex-namorado obcecado e enciumado, sem nenhuma intenção ou ação criminosa. A frase "Eu não vou deixar isso acontecer" se referia ao término do relacionamento — ele queria impedir que ela seguisse em frente, não cometer crime. Estava de fato com André Leal a partir das 21h30 de 07/03, confirmado por câmeras do condomínio de Leal.
+
+O número NÃO IDENTIFICADO (11) 97***-**** pertencia a Henrique Caldas — chip pré-pago descartado.
+
+══════════════════════════════════════════════
+
+DESFECHO:
+Lucas Tavares e Henrique Caldas presos em 18/03/2025.
+Pendrive azul encontrado conforme indicado nas notas de Valentina.
+Operação conjunta com a Polícia Civil resultou em 4 prisões adicionais na organização criminosa.
+
+Valentina Delgado Carmo tinha 28 anos.
+Ela regou as plantas na véspera porque tinha planos.`
+};
+
+// ═══════════════════════════════════════════════════
+// RENDERIZAÇÃO
+// ═══════════════════════════════════════════════════
+
+function pU(n){return ST.phases.has(n);}
+
+function profileCard(p,isW){
+  const lk=p.phase>1&&!pU(p.phase);
+  return`<div class="pc">
+    ${lk?`<div class="pc-ph">⊘</div>`:`<img class="pc-img" src="${p.photo}" alt="${p.name}" onerror="this.style.display='none'">`}
+    <div class="pc-info">
+      ${lk?`<div style="font-size:9px;letter-spacing:2px;color:var(--red);margin-bottom:6px;">IDENTIDADE CLASSIFICADA</div>`:''}
+      <div class="pc-name">${lk?'████████████████':p.name}</div>
+      <div class="pc-role">${lk?`Liberado na Fase ${p.phase}`:isW?'Testemunha':p.status}</div>
+      ${!lk?`
+        <div class="meta" style="margin:10px 0;">
+          <strong>ID:</strong> ${p.id}<br>
+          <strong>Nasc.:</strong> ${p.dob} (${p.age} anos)<br>
+          <strong>Ocupação:</strong> ${p.occ}<br>
+          ${p.addr?`<strong>Endereço:</strong> ${p.addr}<br>`:''}
+          <strong>Relação:</strong> ${p.rel}
+        </div>
+        <span class="sb2 ${isW?'witn':p.scls}">${isW?'TESTEMUNHA':p.status}</span>
+        ${p.stmt?`<div class="stmt">${p.stmt}<cite>— Depoimento, ${p.name}</cite></div>`:''}
+        ${p.notes&&!isW?`<div class="note" style="margin-top:8px;">${p.notes}</div>`:''}
+      `:`<div style="margin-top:10px;font-size:11px;color:var(--text3);">Acesse Arquivos Restritos → Fase ${p.phase} para desbloquear.</div>`}
+    </div>
+  </div>`;
+}
+
+// ── DASHBOARD ──
+function rDashboard(){
+  const pu=[1,2,3,4].filter(n=>pU(n)).length;
+  return`
+  <div class="sh"><div><div class="sh-title">Painel Principal</div><div class="sh-sub">SIGC — Caso 2025-0847-VDC</div></div><span class="badge badge-r">EM ANDAMENTO</span></div>
+  <div class="g3" style="margin-bottom:16px;">
+    <div class="stat"><div class="snum">2</div><div class="slabel">Suspeitos</div></div>
+    <div class="stat"><div class="snum">4</div><div class="slabel">Testemunhas</div></div>
+    <div class="stat"><div class="snum">10</div><div class="slabel">Evidências</div></div>
+    <div class="stat"><div class="snum">${TL.filter(e=>e.ph<=Math.max(...ST.phases)).length}</div><div class="slabel">Eventos Visíveis</div></div>
+    <div class="stat"><div class="snum">${pu}/4</div><div class="slabel">Fases Ativas</div></div>
+    <div class="stat"><div class="snum" style="font-size:18px;margin-top:4px;">07/03</div><div class="slabel">Data do Desap.</div></div>
+  </div>
+  <div class="g2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="ch">Informações do Caso</div>
+      <div class="meta">
+        <strong>Número:</strong> ${CASE.num}<br>
+        <strong>Abertura:</strong> ${CASE.opened}<br>
+        <strong>Última atualização:</strong> ${CASE.updated}<br>
+        <strong>Prioridade:</strong> <span style="color:var(--red)">${CASE.priority}</span><br>
+        <strong>Delegacia:</strong> ${CASE.delegacia}<br>
+        <strong>Responsáveis:</strong> ${CASE.agents}
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">Vítima</div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <img src="${VICTIM.photo}" style="width:62px;height:62px;object-fit:cover;object-position:top;border-radius:2px;filter:contrast(1.04) saturate(.9);" onerror="this.style.display='none'">
+        <div class="meta">
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">${VICTIM.name}</div>
+          <strong>Desaparecida desde:</strong> 07/03/2025<br>
+          <strong>Última loc.:</strong> Bar do Conselho<br>
+          <span class="sb2 miss" style="margin-top:6px;">DESAPARECIDA</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch">Status das Fases de Investigação</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+      ${[1,2,3,4].map(n=>`<div style="padding:12px;background:var(--bg3);border:1px solid ${pU(n)?'rgba(46,204,113,.3)':'var(--border2)'};border-radius:2px;text-align:center;">
+        <div style="font-size:9px;letter-spacing:2px;color:${pU(n)?'var(--green2)':'var(--text3)'};margin-bottom:4px;">FASE ${n}</div>
+        <div style="font-size:10px;color:${pU(n)?'var(--green2)':'var(--red)'};">${pU(n)?'● ATIVO':'○ BLOQUEADO'}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch">Nota dos Investigadores</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.85;">
+      Este caso recebeu classificação <strong style="color:var(--text)">Prioridade ALPHA</strong> pelos indicativos de terceiros envolvidos no desaparecimento. 
+      As fases de acesso restrito contêm evidências progressivamente mais sensíveis que <em>podem alterar significativamente a trajetória da investigação</em>. 
+      Recomenda-se revisão cuidadosa de todos os depoimentos e evidências antes de avançar às próximas fases.<br><br>
+      <span style="color:var(--gold);">⟶ A senha de cada fase está incorporada nos materiais físicos da investigação. Procure com atenção.</span>
+    </div>
+  </div>`;
+}
+
+// ── VISÃO GERAL ──
+function rOverview(){
+  return`
+  <div class="sh"><div><div class="sh-title">Visão Geral do Caso</div><div class="sh-sub">BO 2025/0847 — Resumo Executivo</div></div><span class="badge badge-r">CASO ATIVO</span></div>
+  <div class="doch">
+    <div class="docs">Departamento de Investigação Federal — DIF Brasil</div>
+    <div class="doct">Boletim de Ocorrência — Pessoa Desaparecida</div>
+    <div class="docm">
+      <span><strong>BO:</strong> 2025/0847</span>
+      <span><strong>Data:</strong> 10/03/2025</span>
+      <span><strong>Hora:</strong> 14h32</span>
+      <span><strong>Delegacia:</strong> 3ª DP — Serrano/RS</span>
+      <span><strong>Prioridade:</strong> <span style="color:var(--red)">ALTA</span></span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch">Dados da Vítima</div>
+    <div class="meta" style="display:grid;grid-template-columns:1fr 1fr;gap:5px 24px;">
+      <div><strong>Nome completo:</strong> ${VICTIM.name}</div>
+      <div><strong>Data de nasc.:</strong> ${VICTIM.dob} (${VICTIM.age} anos)</div>
+      <div><strong>Ocupação:</strong> ${VICTIM.occ}</div>
+      <div><strong>Residência:</strong> ${VICTIM.addr}</div>
+      <div><strong>Celular:</strong> ${VICTIM.phone}</div>
+      <div><strong>Instagram:</strong> ${VICTIM.ig}</div>
+      <div><strong>Cabelo:</strong> ${VICTIM.hair}</div>
+      <div><strong>Altura / Peso:</strong> ${VICTIM.height} / ${VICTIM.weight}</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch">Circunstâncias do Desaparecimento</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.9;">
+      Valentina Delgado Carmo foi vista pela última vez em câmera de segurança do Bar do Conselho, saindo do estabelecimento às <strong style="color:var(--text)">23h17 de 07/03/2025</strong>, na companhia de um <strong style="color:var(--gold)">homem não identificado</strong> (alto, ~38-45 anos, terno cinza escuro, cabelo com grisalho).<br><br>
+      Sua irmã Beatriz tentou contato na manhã de sábado sem sucesso. Na segunda-feira (10/03) foi ao apartamento e encontrou a bolsa pessoal da vítima, o celular descarregado na cama e o laptop aberto — todos indicativos de saída não planejada. O apartamento não apresentava sinais de luta ou arrombamento.
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch">Relato da Comunicante — Beatriz Carmo</div>
+    <div class="stmt">${WITNESSES[0].stmt}<cite>— Beatriz Carmo, 24 anos — Depoimento 10/03/2025</cite></div>
+  </div>
+  <div class="card">
+    <div class="ch">Providências Iniciais</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.95;">
+      • Locais de convívio notificados (amigos, família, trabalho).<br>
+      • Hospitais e prontos-socorros da região consultados — resultado negativo.<br>
+      • Imagens de CCTV do Bar do Conselho e adjacências solicitadas e obtidas.<br>
+      • Registros telefônicos obtidos via mandado judicial — operadora CLARO.<br>
+      • Laptop e celular encaminhados à Perícia Digital.<br>
+      • DIF notificado em 11/03/2025 — Prioridade ALPHA declarada.
+    </div>
+  </div>`;
+}
+
+// ── VÍTIMA ──
+function rVitima(){
+  return`
+  <div class="sh"><div><div class="sh-title">Perfil da Vítima</div><div class="sh-sub">Valentina Delgado Carmo — ID: VIT-001</div></div><span class="badge badge-r">DESAPARECIDA</span></div>
+  <div style="display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start;margin-bottom:16px;">
+    <div>
+      <img src="${VICTIM.photo}" style="width:100%;border-radius:2px;filter:contrast(1.05) saturate(.9);" onerror="this.style.background='var(--bg3)'">
+      <div style="margin-top:6px;text-align:center;"><span class="sb2 miss">DESAPARECIDA</span></div>
+      <div style="margin-top:8px;padding:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:2px;font-size:10px;color:var(--text3);text-align:center;letter-spacing:.5px;">ÚLTIMA FOTO CONHECIDA<br>Fonte: perfil Instagram da vítima</div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="ch">Informações Pessoais</div>
+        <div class="meta" style="display:grid;grid-template-columns:1fr 1fr;gap:5px 20px;">
+          <div><strong>Nome:</strong> Valentina Delgado Carmo</div>
+          <div><strong>Nascimento:</strong> 14/06/1996 (28 anos)</div>
+          <div><strong>Naturalidade:</strong> Serrano/RS</div>
+          <div><strong>Estado civil:</strong> Solteira</div>
+          <div><strong>Ocupação:</strong> ${VICTIM.occ}</div>
+          <div><strong>Instagram:</strong> ${VICTIM.ig}</div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="ch">Descrição Física</div>
+        <div class="meta" style="display:grid;grid-template-columns:1fr 1fr;gap:5px 20px;">
+          <div><strong>Cabelo:</strong> ${VICTIM.hair}</div>
+          <div><strong>Olhos:</strong> ${VICTIM.eyes}</div>
+          <div><strong>Altura:</strong> ${VICTIM.height}</div>
+          <div><strong>Peso:</strong> ${VICTIM.weight}</div>
+          <div style="grid-column:span 2"><strong>Roupa no desaparecimento:</strong> ${VICTIM.roupa}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch">Perfil Pessoal e Contexto</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.9;">
+      Valentina trabalhava como designer gráfica há 3 anos, combinando trabalho freelancer com vínculo formal na <strong style="color:var(--text)">Tavares Arquitetura & Design Ltda.</strong> há 14 meses. Amigos e familiares a descrevem como "determinada, criativa e reservada" — tinha poucos amigos próximos, mas relações profundas. Gostava de plantas de apartamento <span style="color:var(--gold)">(especialmente íris e samambaias)</span>, design japonês, café coado e longas playlists de jazz.<br><br>
+      Terminou um relacionamento de 2 anos com <strong style="color:var(--text)">Rafael Menezes</strong> em novembro/2024. Amigos relatam que ela estava "tentando seguir em frente" e que havia "algo novo na vida dela" nas últimas semanas — mas ela não havia revelado detalhes a ninguém.
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch">Contatos Próximos Identificados</div>
+    <div class="meta">
+      <strong>Irmã:</strong> Beatriz "Bia" Carmo — (54) 99123-4455<br>
+      <strong>Amigo próximo:</strong> Marcos Henrique Fontes — (54) 99231-6640<br>
+      <strong>Empregador:</strong> Lucas Renato Tavares — (54) 99341-7700<br>
+      <strong>Ex-namorado (pessoa de interesse):</strong> Rafael Augusto Menezes — (54) 99672-8834
+    </div>
+  </div>`;
+}
+
+// ── SUSPEITOS ──
+function rSuspeitos(){
+  return`
+  <div class="sh"><div><div class="sh-title">Suspeitos / Pessoas de Interesse</div><div class="sh-sub">${SUSPECTS.length} perfil(s) cadastrado(s)</div></div></div>
+  <div class="g2">
+    ${SUSPECTS.map(s=>profileCard(s,false)).join('')}
+  </div>
+  ${!pU(3)?`<div class="card" style="border-color:rgba(176,48,48,.25);background:rgba(139,0,0,.06);">
+    <div class="ch" style="color:var(--red)">Classificado — Fase 3</div>
+    <div style="font-size:13px;color:var(--text2);">Um perfil adicional será desbloqueado na Fase 3. Acesse Arquivos Restritos para inserir o código de acesso.</div>
+  </div>`:''}`;
+}
+
+// ── TESTEMUNHAS ──
+function rTestemunhas(){
+  const vis=WITNESSES.filter(w=>pU(w.phase));
+  const lk=WITNESSES.filter(w=>!pU(w.phase));
+  return`
+  <div class="sh"><div><div class="sh-title">Testemunhas</div><div class="sh-sub">${vis.length} de ${WITNESSES.length} perfil(s) disponível(is)</div></div></div>
+  <div class="g2">
+    ${vis.map(w=>profileCard(w,true)).join('')}
+    ${lk.map(w=>`<div class="pc">
+      <div class="pc-ph" style="background:rgba(139,0,0,.06);">⊘</div>
+      <div class="pc-info">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--red);margin-bottom:6px;">IDENTIDADE CLASSIFICADA</div>
+        <div class="pc-name">████████████████</div>
+        <div class="pc-role">Testemunha — Fase ${w.phase}</div>
+        <div style="margin-top:10px;font-size:11px;color:var(--text3);">Depoimento disponível a partir da Fase ${w.phase}. Acesse Arquivos Restritos.</div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ── EVIDÊNCIAS ──
+function rEvidencias(){
+  return`
+  <div class="sh"><div><div class="sh-title">Registro de Evidências</div><div class="sh-sub">${EVIDENCE.length} item(s) — ${EVIDENCE.filter(e=>pU(e.ph)).length} acessível(is)</div></div></div>
+  <div style="overflow-x:auto;">
+    <table class="etbl">
+      <thead><tr><th>ID</th><th>Tipo</th><th>Descrição</th><th>Data</th><th>Detalhes / Status</th></tr></thead>
+      <tbody>
+      ${EVIDENCE.map(e=>{
+        const lk=!pU(e.ph);
+        return`<tr>
+          <td><span class="eid">${e.id}</span></td>
+          <td style="color:var(--text2);font-size:11px;">${e.type}</td>
+          <td style="color:${lk?'var(--text3)':'var(--text)'}">${lk?`<span style="color:var(--red);font-size:10px;">⊘ Fase ${e.ph}</span>`:e.desc}</td>
+          <td style="color:var(--text2);font-family:monospace;font-size:11px;">${e.date}</td>
+          <td style="font-size:11px;color:${lk?'var(--text3)':'var(--text2)'}">${lk?'[ACESSO RESTRITO]':e.detail}</td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// ── TIMELINE ──
+function rTimeline(){
+  return`
+  <div class="sh"><div><div class="sh-title">Linha do Tempo</div><div class="sh-sub">Cronologia de eventos — Caso 2025-0847-VDC</div></div></div>
+  <div class="tl">
+    ${TL.map(e=>{
+      const lk=!pU(e.ph)&&e.ph>1;
+      const isR=e.type==='r';
+      const isLk=e.type==='lk';
+      return`<div class="tle">
+        <div class="tld ${isLk?'lk':isR?'red':''}"></div>
+        <div class="tl-time">${e.d}</div>
+        <div class="tl-txt" style="color:${lk||isLk?'var(--text3)':isR?'#ff9090':'var(--text)'}">${e.t}</div>
+        ${e.s&&!lk?`<div class="tl-sub">${e.s}</div>`:''}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ── COMUNICADOS ──
+function rComunicados(){
+  const cs=[
+    {date:'10/03/2025 — 15h20',from:'Del. Ana Paula Xerez',to:'Ag. Rodrigo Assumpção',subj:'Abertura do Caso — Protocolo de Emergência',
+     body:'Caso recebeu Prioridade ALPHA após avaliação inicial. Vítima não possui histórico de desaparecimentos voluntários. Família nega qualquer motivação. Circunstâncias sugerem intervenção de terceiros. SIGC ativado. Código de acesso nível 1: SIGC2025.'},
+    {date:'11/03/2025 — 09h30',from:'Ag. Rodrigo Assumpção',to:'Equipe DIF Serrano',subj:'Início das Diligências — Pontos Prioritários',
+     body:'Prioridades imediatas:\n(1) Análise completa de CCTV — Bar do Conselho e arredores.\n(2) Registros de chamadas — operadora CLARO — últimos 7 dias.\n(3) Entrevistas com círculo próximo da vítima.\n(4) Verificação de localização GPS — celular offline desde aprox. 22h50 de 07/03.\n\nAtenção especial para o ex-namorado Rafael Menezes — histórico de mensagens após o término. Aguardem relatório da Perícia Digital sobre o laptop.'},
+    {date:'12/03/2025 — 17h00',from:'Lab. Perícia Digital — DIF',to:'Ag. Rodrigo Assumpção',subj:'Relatório Inicial — Análise de Dispositivos',
+     body:'Celular: extração parcial via backup iCloud autorizado por mandado. Registros de chamadas e SMS disponíveis. WhatsApp: exportação das últimas conversas concluída — disponível para liberação na próxima fase.\n\nLaptop: sistema bloqueado por senha. Pasta "Projeto X" detectada com criptografia AES-256. Tentativa de acesso via método forense em andamento. Estimativa: 72–96h.'},
+    {date:'13/03/2025 — 11h15',from:'Ag. Rodrigo Assumpção',to:'Equipe DIF',subj:'ATUALIZAÇÃO — Novo Depoimento Relevante',
+     body:'O colega de trabalho da vítima, Marcos Henrique Fontes, compareceu espontaneamente à delegacia às 10h40. Prestou depoimento que altera significativamente o panorama da investigação. A ameaça percebida pela vítima pode não ser o ex-namorado. Detalhes completos disponíveis na FASE 2.'},
+    {date:'14/03/2025 — 08h50',from:'Ag. Rodrigo Assumpção',to:'Equipe DIF / Delegacia',subj:'URGENTE — Correspondência Financeira e CCTV',
+     body:'Análise bancária revelou transações atípicas na conta da vítima com conexão a entidade jurídica suspeita. Análise expandida do CCTV resultou em identificação positiva de suspeito. O panorama do caso mudou de forma substancial. Detalhes e novo perfil disponíveis na FASE 3.'},
+    {date:'17/03/2025 — 14h00',from:'IML Serrano',to:'Ag. Rodrigo Assumpção / DIF Brasil',subj:'CLASSIFICADO — Resultado Laudo Pericial',
+     body:'[DOCUMENTO DE NÍVEL 4]\nResultado disponível exclusivamente na Fase 4. Este comunicado confirma novos e críticos desenvolvimentos. O acesso ao nível 4 é necessário para prosseguimento da investigação. Código de acesso incorporado nos materiais da Fase 3.'}
+  ];
+  return`
+  <div class="sh"><div><div class="sh-title">Comunicados Internos</div><div class="sh-sub">Log de comunicações — Caso 2025-0847</div></div></div>
+  ${cs.map(c=>`<div class="comm">
+    <div class="comm-meta"><span>${c.date}</span><span>De: ${c.from}</span><span>Para: ${c.to}</span></div>
+    <div class="comm-subj">Assunto: ${c.subj}</div>
+    <div class="comm-body">${c.body}</div>
+  </div>`).join('')}`;
+}
+
+// ── FASE 1 ──
+function rFase1(){
+  return`
+  <div class="sh"><div><div class="sh-title">Fase 1 — Acesso Inicial</div><div class="sh-sub">Materiais do Dia 1 e 2</div></div><span class="badge badge-g">ATIVO</span></div>
+  <div class="card">
+    <div class="ch">Conteúdo desta Fase</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.9;">
+      A Fase 1 inclui todos os materiais de acesso geral: perfil completo da vítima, depoimentos de Bia e Dona Cida, evidências físicas do apartamento (EVID-001 a EVID-004) e o registro de CCTV do Bar do Conselho. Todo o conteúdo está visível nas seções do menu lateral.
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch">Materiais Físicos — Para Imprimir (Dia 1)</div>
+    <div style="font-size:13px;color:var(--text2);line-height:2;">
+      ▸ Ficha de pessoa desaparecida — Valentina Carmo (com foto)<br>
+      ▸ Depoimento assinado de Beatriz "Bia" Carmo<br>
+      ▸ Depoimento assinado de Dona Cida (vizinha)<br>
+      ▸ Fotografia do apartamento (escrivaninha + planta de íris + laptop aberto)<br>
+      ▸ Frame do CCTV — Bar do Conselho (imagem propositalmente granulada)
+    </div>
+  </div>
+  <div class="card" style="border-color:rgba(201,168,76,.3);">
+    <div class="ch">Questões Abertas — Fase 1</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.9;">
+      ⟶ Quem é o homem que saiu com Valentina do bar? (alto, ~40 anos, terno escuro, cabelo com grisalho)<br>
+      ⟶ Por que ela saiu sem a bolsa?<br>
+      ⟶ O que estava fazendo no laptop que foi deixado aberto?<br>
+      ⟶ Rafael Menezes é realmente ameaça ou apenas um ex ciumento?<br>
+      ⟶ O que há de "novo na vida dela" que ela não contou para ninguém?
+    </div>
+  </div>`;
+}
+
+// ── FASE 2 ──
+function rFase2(){
+  if(!pU(2))return rLock(2,'Fase 2 — Nível de Acesso Restrito',
+    'Contém registros de chamadas, conversas de WhatsApp, declaração de alibi e depoimento crucial que muda a direção da investigação.',
+    'A senha está no depoimento físico de Marcos Fontes (recebido no Dia 3). Leia com atenção — Marcos deixou algo importante no final.'
+  );
+  return`
+  <div class="sh"><div><div class="sh-title">Fase 2 — Acesso Liberado</div><div class="sh-sub">Registros, Mensagens e Depoimento Crucial</div></div><span class="badge badge-g">ATIVO</span></div>
+
+  <div class="card">
+    <div class="ch">Registros de Chamadas — Chip Valentina Carmo — 7 dias anteriores</div>
+    <div class="plog">
+      <div class="pl" style="color:var(--gold);border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px;font-weight:700;">
+        <span class="pt">DATA/HORA</span><span class="pn">NÚMERO</span><span>TIPO / CONTATO / DURAÇÃO</span>
+      </div>
+      ${[
+        ['01/03 — 09h12','(54) 99231-6640','Efetuada — Marcos Fontes — 2min 11s',''],
+        ['03/03 — 14h18','(54) 99672-8834','Recebida — Rafael Menezes — 0s (não atendida)',''],
+        ['03/03 — 14h19','(54) 99672-8834','Recebida — Rafael Menezes — 0s (não atendida)',''],
+        ['04/03 — 10h30','(54) 99341-7700','Efetuada — Lucas Tavares — 4min 07s',''],
+        ['05/03 — 14h22','(54) 99231-6640','Efetuada — Marcos Fontes — 8min 12s',''],
+        ['05/03 — 16h45','(54) 99341-7700','Recebida — Lucas Tavares — 6min 51s',''],
+        ['07/03 — 08h23','(54) 99672-8834','Recebida — Rafael Menezes — 0s (não atendida)',''],
+        ['07/03 — 10h15','(54) 99672-8834','Recebida — Rafael Menezes — 2min 34s',''],
+        ['07/03 — 14h42','(54) 99231-6640','Efetuada — Marcos Fontes — 8min 12s',''],
+        ['07/03 — 21h44','(11) 97***-****','Recebida — NÚMERO NÃO IDENTIFICADO — 4min 52s','ph'],
+        ['07/03 — 22h15','(11) 97***-****','Recebida — NÚMERO NÃO IDENTIFICADO — 1min 18s','ph'],
+        ['07/03 — 22h30','(54) 99672-8834','SMS recebido — Rafael Menezes — "V, onde você está?"',''],
+        ['07/03 — 23h47','(54) 99672-8834','SMS recebido — Rafael Menezes — "Valentina?" [não lida]',''],
+        ['08/03 em diante','—','DISPOSITIVO OFFLINE — sem registros','']
+      ].map(([t,n,d,cls])=>`<div class="pl ${cls}"><span class="pt">${t}</span><span class="pn">${n}</span><span>${d}</span></div>`).join('')}
+    </div>
+    <div class="note" style="margin-top:8px;font-size:11px;">⚠ Número (11) 97***-**** — chip pré-pago descartável, sem titular identificado. IMEI em análise forense. Operadora: Claro. As duas chamadas ocorreram <em>antes</em> de Valentina ir ao bar.</div>
+  </div>
+
+  <div class="card">
+    <div class="ch">Exportação WhatsApp — Rafael Menezes → Valentina Carmo</div>
+    <div class="wa">
+      <div class="wa-hdr">🔒 Conversa criptografada — Exportação via mandado judicial 08/03/2025<br><strong>Rafael Menezes</strong> ↔ <strong>Valentina Carmo</strong> — Últimos 30 dias</div>
+      ${[
+        [false,'20/02 — 11h30','Oi Valentina. Tô passando bem. Pensei em você.'],
+        [true,'20/02 — 11h47','Oi Rafael. Fico feliz que esteja bem.'],
+        [false,'25/02 — 23h10','Val, você está bem? Soube que você anda ocupada.'],
+        [false,'28/02 — 19h43','Valentina, eu sei que você está vendo alguém.'],
+        [false,'28/02 — 19h44','Não me responde?'],
+        [false,'01/03 — 08h12','Eu precisava de uma explicação. Acho que mereço isso.'],
+        [false,'01/03 — 23h51','Tá bom, se é assim que você quer. Tudo bem.'],
+        [false,'03/03 — 14h22','Vi você no centro hoje. Com quem você estava?'],
+        [false,'03/03 — 14h23','Era ele? O seu "chefe"?'],
+        [false,'04/03 — 02h14','Não consigo dormir pensando nisso.'],
+        [false,'04/03 — 02h15','Eu não vou deixar isso acontecer.'],
+        [false,'05/03 — 17h30','Val, vamos conversar. Por favor. Só me deixa te ver uma vez.'],
+        [false,'06/03 — 11h08','Se você não falar comigo eu vou lá no apartamento te ver.'],
+        [false,'07/03 — 08h23','[Chamada de vídeo — não atendida]'],
+        [false,'07/03 — 22h30','Onde você está? [entregue, não lida]'],
+        [false,'07/03 — 23h47','Valentina? [entregue, não lida]'],
+        [false,'08/03 — 09h12','Por que não atende? Me avisa que está bem [não lida]'],
+      ].map(([s,t,m])=>`<div class="wam ${s?'s':'r'}"><div class="wab">${m}</div><div class="wat">${t}</div></div>`).join('')}
+    </div>
+    <div class="note" style="margin-top:8px;font-size:11px;">
+      ⚠ <strong>"Eu não vou deixar isso acontecer" (04/03, 02h15)</strong> — refere-se ao relacionamento dela com o "chefe", ou a algo mais grave?<br>
+      ⚠ <strong>"era ele? o seu chefe?" (03/03)</strong> — Rafael sabia da existência de uma pessoa chamada de "chefe" por Valentina.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">André Vitor Leal — Declaração de Alibi para Rafael Menezes</div>
+    <div class="meta" style="margin-bottom:10px;"><strong>Declarante:</strong> André Vitor Leal, 32 anos — Corretor de Imóveis<br><strong>Data:</strong> 11/03/2025 — 3ª DP Serrano</div>
+    <div class="stmt">"Na noite de sexta, o Rafael veio aqui em casa por volta das nove e meia da noite. A gente ficou jogando videogame, tomando cerveja, até umas duas da manhã. Ele estava estressado, falou alguma coisa sobre a ex-namorada, mas ficou aqui o tempo todo. Não saiu."
+      <cite>— André Vitor Leal, depoimento 11/03/2025</cite>
+    </div>
+    <div class="note-r" style="margin-top:8px;font-size:11px;">⚠ <strong>NOTA DO INVESTIGADOR:</strong> O alibi de André Leal cobre Rafael a partir das 21h30. Valentina foi vista saindo do bar às 23h17. O alibi tecnicamente NÃO exclui Rafael do período crítico anterior às 21h30 — mas também não o coloca no local. Câmeras do condomínio de Leal foram solicitadas para verificação.</div>
+  </div>
+
+  <div class="card" style="border-color:rgba(200,100,0,.3);">
+    <div class="ch" style="color:#ffa060">Depoimento Espontâneo — Marcos Henrique Fontes (Dia 3)</div>
+    <div class="meta" style="margin-bottom:10px;"><strong>Data:</strong> 13/03/2025 — comparecimento voluntário<br><strong>Horário:</strong> 10h40</div>
+    <div class="stmt">${WITNESSES[2].stmt}<cite>— Marcos Henrique Fontes, depoimento 13/03/2025</cite></div>
+    <div class="note" style="margin-top:8px;font-size:11px;">⚠ Valentina mencionou uma pasta chamada "Projeto X" — que a Perícia Digital já identificou como protegida por senha. Marcos afirma que o medo dela <strong>não era Rafael</strong>. De quem ou o quê ela tinha medo?</div>
+  </div>`;
+}
+
+// ── FASE 3 ──
+function rFase3(){
+  if(!pU(3))return rLock(3,'Fase 3 — Nível de Acesso Restrito',
+    'Contém documentos financeiros, análise expandida de CCTV com identificação positiva de suspeito, e conexão com entidade jurídica suspeita.',
+    'A senha está nos documentos financeiros recebidos no Dia 4. Procure no nome da empresa suspeita identificada nos extratos.'
+  );
+  return`
+  <div class="sh"><div><div class="sh-title">Fase 3 — Acesso Liberado</div><div class="sh-sub">Documentos Financeiros e Novo Suspeito</div></div><span class="badge badge-g">ATIVO</span></div>
+
+  <div class="card" style="border-color:rgba(176,48,48,.4);background:rgba(139,0,0,.05);">
+    <div class="ch" style="color:var(--red)">⚠ Atualização de Status — Reclassificação de Suspeito</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8;">
+      Com base nas evidências desta fase, <strong style="color:var(--text)">Lucas Renato Tavares</strong> foi reclassificado de <em>Testemunha</em> para <strong style="color:#ff8080">Suspeito Primário</strong>. Consulte o perfil atualizado na seção Suspeitos.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">Lucas Renato Tavares — Perfil Expandido</div>
+    <div style="display:grid;grid-template-columns:170px 1fr;gap:16px;align-items:start;">
+      <img src="${SUSPECTS[1].photo}" style="width:100%;border-radius:2px;filter:contrast(1.04);" onerror="this.style.display='none'">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px;">Lucas Renato Tavares — 38 anos</div>
+        <div class="meta">
+          <strong>Empresa:</strong> Tavares Arquitetura & Design Ltda. (fundada 2018)<br>
+          <strong>Veículo:</strong> Toyota Corolla XEi 2022, cinza/prata — Placa <strong style="color:var(--gold)">RXZ-0149</strong><br>
+          <strong>Estado civil:</strong> Casado — Daniela Cristina Tavares (38 anos)<br>
+          <strong>Filhos:</strong> Um filho (7 anos)<br>
+          <strong>Antecedentes:</strong> Nenhum registro criminal
+        </div>
+        <div class="note-r" style="margin-top:10px;font-size:12px;">
+          Lucas declarou à polícia em 10/03 que estava em casa na noite de 07/03 e que não tinha "compromisso pessoal fora do horário de trabalho" com Valentina.<br>
+          <strong style="color:#ffaaaa">→ CONTRADIÇÃO IDENTIFICADA — ver análise CCTV abaixo.</strong>
+        </div>
+        <span class="sb2 susp" style="margin-top:10px;">SUSPEITO PRIMÁRIO</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">Análise CCTV Expandida — Identificação Positiva</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.9;">
+      A análise de reconhecimento facial das imagens do Bar do Conselho (07/03/2025, 23h06) retornou resultado positivo com <strong style="color:var(--text)">87% de confiança</strong>:<br><br>
+      O homem identificado é <strong style="color:#ff9060">LUCAS RENATO TAVARES, 38 anos.</strong><br><br>
+      Confirmação adicional: <strong style="color:var(--gold)">Toyota Corolla cinza/prata — placa RXZ-0149</strong> (veículo de L.R. Tavares) foi captado às <strong>23h31</strong> pela câmera da R. Borges de Medeiros — mesma direção seguida por Valentina e o homem ao sair do bar.
+    </div>
+    <div class="note-r" style="font-size:12px;">
+      Lucas Tavares <strong>mentiu para a polícia</strong> ao afirmar que estava em casa. As câmeras provam que ele estava no Bar do Conselho e saiu com Valentina Carmo às 23h17.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">Extrato Bancário — Valentina Carmo — Banco Meridional</div>
+    <div style="font-size:10px;letter-spacing:1px;color:var(--text3);margin-bottom:10px;">CONTA CORRENTE 0092-847X — PERÍODO: JAN–MAR/2025 — ITENS SELECIONADOS</div>
+    <div class="plog" style="font-size:11px;">
+      <div class="pl" style="color:var(--gold);border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px;font-weight:700;">
+        <span style="width:80px;display:inline-block;">DATA</span>
+        <span style="flex:1;display:inline-block;">HISTÓRICO</span>
+        <span style="width:130px;text-align:right;display:inline-block;">VALOR</span>
+      </div>
+      ${[
+        ['15/01','TED RECEBIDA — TAVARES ARQ & DESIGN LTDA','+ R$ 12.500,00',''],
+        ['15/02','TED RECEBIDA — TAVARES ARQ & DESIGN LTDA','+ R$ 12.500,00',''],
+        ['20/02','PIX RECEBIDO — L.R.TAVARES (CPF: ***341***)','+ R$ 8.000,00','ph'],
+        ['22/02','PIX ENVIADO — FAV.: L.R.TAVARES (CPF: ***341***)','− R$ 8.000,00','ph'],
+        ['28/02','TED RECEBIDA — MERIDIONAL CONST. E SERV. LTDA','+ R$ 3.200,00','ph'],
+        ['01/03','TED RECEBIDA — TAVARES ARQ & DESIGN LTDA','+ R$ 5.000,00',''],
+        ['05/03','PIX RECEBIDO — L.R.TAVARES (CPF: ***341***)','+ R$ 2.500,00','ph'],
+      ].map(([d,h,v,cls])=>`<div class="pl ${cls}" style="display:flex;gap:12px;">
+        <span style="width:80px;color:var(--text2);flex-shrink:0;">${d}</span>
+        <span style="flex:1;">${h}</span>
+        <span style="width:130px;text-align:right;color:${v.startsWith('-')?'#ff9090':'#90ffb0'};flex-shrink:0;">${v}</span>
+      </div>`).join('')}
+    </div>
+    <div class="note" style="margin-top:8px;font-size:11px;">⚠ PIX recebido e enviado de mesma pessoa no mesmo valor (R$8.000) no mesmo período: possível "passagem" de dinheiro. MERIDIONAL CONSTRUÇÕES E SERVIÇOS LTDA aparece como remetente — empresa sem obras registradas (ver abaixo).</div>
+  </div>
+
+  <div class="card">
+    <div class="ch">Análise Empresarial — Tavares Arq. & Design + Meridional Construções</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.95;">
+      <strong style="color:var(--text)">Tavares Arquitetura & Design Ltda.</strong><br>
+      Receita bruta declarada 2024: R$2,1 milhões.<br>
+      Média regional de empresas equivalentes em Serrano: R$420–600 mil.<br>
+      <strong style="color:#ff9060">Discrepância: +250% acima da média. Incompatível com o porte operacional.</strong><br><br>
+      <strong style="color:var(--text)">Meridional Construções e Serviços Ltda.</strong><br>
+      CNPJ: 47.832.***/0001-** — Titular: Henrique Caldas, 44 anos.<br>
+      Obras registradas: <strong style="color:var(--red)">ZERO.</strong> Funcionários: 2 (administ.).<br>
+      Movimentação bancária 2024: R$4,7 milhões.<br>
+      <strong style="color:#ff9060">Empresa sem atividade real identificada — possível fachada para lavagem de ativos.</strong>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:rgba(201,168,76,.3);">
+    <div class="ch">Novo Perfil Identificado — Henrique Caldas</div>
+    <div class="meta">
+      <strong>Nome:</strong> Henrique Caldas, 44 anos<br>
+      <strong>Ocupação:</strong> Empresário — Meridional Construções e Serviços Ltda.<br>
+      <strong>Endereço:</strong> R. da Araucária, 19 — Bairro Campos Verdes, Serrano/RS<br>
+      <strong>Conexão com Tavares:</strong> Sócio oculto — confirmado por cruzamento de CNPJ e contas bancárias compartilhadas.<br>
+      <strong>Antecedentes:</strong> Investigado (nunca indiciado) por sonegação fiscal em 2019 — SP.
+    </div>
+    <div class="note" style="font-size:12px;">Quem é Henrique Caldas? Por que seu nome aparece nas empresas de Lucas Tavares? O que ele tem a ver com o desaparecimento de Valentina?</div>
+  </div>`;
+}
+
+// ── FASE 4 ──
+function rFase4(){
+  if(!pU(4))return rLock(4,'Fase 4 — Acesso Máximo Restrito',
+    'Contém documentos criptografados extraídos do laptop da vítima, laudo pericial completo e conclusão investigativa. Acesse apenas quando todos os elementos foram analisados.',
+    'A senha está nas anotações pessoais de Valentina recebidas junto com os materiais do Dia 6. Ela deixou uma frase final.'
+  );
+  const e1=enc64(SECRETS.projetoX);
+  const e2=enc64(SECRETS.laudo);
+  const e3=enc64(SECRETS.conclusao);
+  return`
+  <div class="sh"><div><div class="sh-title">Fase 4 — Acesso Máximo</div><div class="sh-sub">Arquivos Criptografados e Conclusão Investigativa</div></div><span class="badge badge-r">CLASSIFICADO</span></div>
+
+  <div class="card" style="border-color:rgba(176,48,48,.35);">
+    <div class="ch" style="color:var(--red)">Depoimento — Daniela Cristina Tavares</div>
+    <div class="meta" style="margin-bottom:10px;"><strong>Data:</strong> 16/03/2025 — DIF, Serrano<br><strong>Contexto:</strong> Comparecimento espontâneo após o início das buscas formais</div>
+    <div class="stmt">${WITNESSES[3].stmt}<cite>— Daniela Cristina Tavares, depoimento 16/03/2025</cite></div>
+    <div class="note" style="font-size:12px;">⚠ Daniela menciona "Henrique". Quem é ele e o que Lucas precisava "resolver antes do fim de semana"?</div>
+  </div>
+
+  <div class="card">
+    <div class="ch">EVID-009 — Pasta "Projeto X" — Laptop da Vítima</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">
+      Arquivo extraído pela Perícia Digital após quebra da senha AES-256. Conteúdo exibido em <strong>codificação BASE64</strong> conforme protocolo de preservação de evidência digital.<br>
+      <span style="color:var(--gold);">⟶ Para ler: copie o código abaixo e acesse <strong>base64decode.org</strong> ou qualquer decodificador BASE64 online.</span>
+    </div>
+    <div class="clsblk">
+      <div class="cll">⊘ Arquivo criptografado — Decodificar com BASE64</div>
+      <div class="enc" id="enc1">${e1}</div>
+    </div>
+    <button onclick="navigator.clipboard.writeText(document.getElementById('enc1').textContent).then(()=>alert('Código copiado!'))" style="margin-top:8px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:6px 14px;font-size:11px;cursor:pointer;border-radius:2px;">Copiar código</button>
+  </div>
+
+  <div class="card">
+    <div class="ch">EVID-010 — Laudo Pericial — IML Serrano</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">
+      Laudo liberado mediante ordem judicial. Sensibilidade máxima — codificado conforme protocolo.<br>
+      <span style="color:var(--gold);">⟶ Decodifique com ferramenta BASE64</span>
+    </div>
+    <div class="clsblk">
+      <div class="cll">⊘ Laudo Pericial — Decodificar com BASE64</div>
+      <div class="enc" id="enc2">${e2}</div>
+    </div>
+    <button onclick="navigator.clipboard.writeText(document.getElementById('enc2').textContent).then(()=>alert('Código copiado!'))" style="margin-top:8px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:6px 14px;font-size:11px;cursor:pointer;border-radius:2px;">Copiar código</button>
+  </div>
+
+  <div class="card" style="border:1px solid rgba(176,48,48,.5);background:rgba(139,0,0,.08);">
+    <div class="ch" style="color:var(--red)">Conclusão Investigativa — Uso Restrito</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">
+      Documento final de conclusão do caso. Decodifique apenas quando todas as evidências foram analisadas e vocês chegaram às suas próprias conclusões.<br>
+      <span style="color:var(--gold);">⟶ Decodifique com ferramenta BASE64</span>
+    </div>
+    <div class="clsblk">
+      <div class="cll">⊘ Conclusão Investigativa — Decodificar com BASE64</div>
+      <div class="enc" id="enc3">${e3}</div>
+    </div>
+    <button onclick="navigator.clipboard.writeText(document.getElementById('enc3').textContent).then(()=>alert('Código copiado!'))" style="margin-top:8px;background:var(--bg3);border:1px solid rgba(176,48,48,.5);color:#ff8080;padding:6px 14px;font-size:11px;cursor:pointer;border-radius:2px;">Copiar código</button>
+  </div>`;
+}
+
+// ── LOCK SCREEN ──
+function rLock(n,title,desc,hint){
+  return`
+  <div class="sh"><div><div class="sh-title">Arquivo Restrito</div></div><span class="badge badge-r">BLOQUEADO</span></div>
+  <div class="phlock">
+    <div style="font-size:52px;margin-bottom:18px;">🔒</div>
+    <h2>${title}</h2>
+    <p>${desc}</p>
+    <input type="text" id="pw${n}" placeholder="CÓDIGO DE ACESSO" autocomplete="off" spellcheck="false" onkeyup="if(event.key==='Enter')tryUnlock(${n})">
+    <button class="btn-ul" onclick="tryUnlock(${n})">Inserir Código de Acesso</button>
+    <div class="ul-err" id="ue${n}"></div>
+    <p class="ul-hint" onclick="showHint(${n},'${hint}')">Dica: onde encontrar a senha?</p>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// NAVEGAÇÃO & ESTADO
+// ═══════════════════════════════════════════════════
+
+const RMAP={
+  dashboard:rDashboard,overview:rOverview,vitima:rVitima,
+  suspeitos:rSuspeitos,testemunhas:rTestemunhas,evidencias:rEvidencias,
+  timeline:rTimeline,comunicados:rComunicados,
+  fase1:rFase1,fase2:rFase2,fase3:rFase3,fase4:rFase4
+};
+
+function nav(el,sec){
+  document.querySelectorAll('.nav').forEach(i=>i.classList.remove('active'));
+  if(el)el.classList.add('active');
+  ST.sec=sec;
+  const mc=document.getElementById('mc');
+  const fn=RMAP[sec];
+  mc.innerHTML=fn?fn():'<div class="card">Em desenvolvimento.</div>';
+  mc.scrollTop=0;
+}
+
+function tryUnlock(n){
+  const inp=document.getElementById('pw'+n);
+  const err=document.getElementById('ue'+n);
+  const val=(inp.value||'').trim().toUpperCase();
+  const ok={2:PW.p2,3:PW.p3,4:PW.p4};
+  if(val===ok[n]){
+    ST.phases.add(n);
+    const lkEl=document.getElementById('lk'+n);
+    if(lkEl){lkEl.textContent='ATIVO';lkEl.classList.add('on');}
+    const navEl=document.querySelector(`[data-s="fase${n}"]`);
+    if(navEl){navEl.querySelector('.ic').textContent='🔓';}
+    nav(navEl,'fase'+n);
+  } else {
+    if(err){err.style.color='var(--red)';err.textContent='Código inválido. Verifique os materiais físicos do caso.';}
+    if(inp)inp.value='';
+    setTimeout(()=>{if(err)err.textContent='';},3500);
+  }
+}
+
+function showHint(n,hint){
+  const err=document.getElementById('ue'+n);
+  if(err){err.style.color='var(--gold)';err.textContent=hint;}
+}
+
+// ═══════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════
+
+function doLogin(){
+  const pass=(document.getElementById('lp').value||'').trim().toUpperCase();
+  const err=document.getElementById('lerr');
+  if(pass===PW.login){
+    document.getElementById('login-screen').style.display='none';
+    const app=document.getElementById('app');
+    app.style.display='flex';
+    const d=document.querySelector('[data-s="dashboard"]');
+    nav(d,'dashboard');
+  } else {
+    if(err)err.textContent='Código de acesso inválido. Autorização negada.';
+    document.getElementById('lp').value='';
+    setTimeout(()=>{if(err)err.textContent='';},3500);
+  }
+}
+
+function doLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('lp').value='';
+  ST.phases=new Set([1]);
+  [2,3,4].forEach(n=>{
+    const l=document.getElementById('lk'+n);
+    if(l){l.textContent='BLOQ.';l.classList.remove('on');}
+    const el=document.querySelector(`[data-s="fase${n}"] .ic`);
+    if(el)el.textContent='🔒';
+  });
+}
+
+document.getElementById('lp').addEventListener('keyup',e=>{if(e.key==='Enter')doLogin();});
+</script>
+</body>
+</html>
