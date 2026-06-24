@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tavares Arquitetura & Design — Serrano/RS</title>
+<!--
+  ╔══════════════════════════════════════════════════════════╗
+  ║  NOTA INTERNA — ACESSO RESTRITO                        ║
+  ║  Última modificação do servidor: 28/02/2025 03:14:22   ║
+  ║  Usuário: hcaldas@meridional.srv.br                    ║
+  ║  IP de origem: 179.108.44.***                          ║
+  ╚══════════════════════════════════════════════════════════╝
+-->
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Segoe UI',Helvetica,Arial,sans-serif;color:#1a1a1a;background:#fff;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-bottom:1px solid #e8e8e8;}
+.nav-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:72px;}
+.logo{display:flex;align-items:center;gap:14px;text-decoration:none;}
+.logo-mark{width:36px;height:36px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;}
+.logo-mark svg{width:20px;height:20px;fill:#fff;}
+.logo-text{font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1a1a1a;}
+.logo-sub{font-size:10px;letter-spacing:3px;color:#888;text-transform:uppercase;margin-top:1px;}
+.nav-links{display:flex;gap:36px;align-items:center;}
+.nav-links a{text-decoration:none;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#444;transition:color .2s;}
+.nav-links a:hover{color:#1a1a1a;}
+.nav-cta{background:#1a1a1a;color:#fff!important;padding:10px 22px;letter-spacing:1px;transition:background .2s!important;}
+.nav-cta:hover{background:#333!important;}
+
+/* ── HERO ── */
+.hero{height:100vh;position:relative;overflow:hidden;display:flex;align-items:center;}
+.hero-bg{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1600&h=1000&fit=crop') center/cover no-repeat;}
+.hero-overlay{position:absolute;inset:0;background:rgba(10,10,10,.55);}
+.hero-content{position:relative;z-index:2;max-width:1100px;margin:0 auto;padding:0 40px;color:#fff;}
+.hero-tag{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:20px;}
+.hero-title{font-size:clamp(36px,6vw,72px);font-weight:300;letter-spacing:-1px;line-height:1.1;margin-bottom:24px;}
+.hero-title strong{font-weight:700;}
+.hero-sub{font-size:16px;color:rgba(255,255,255,.7);max-width:480px;line-height:1.7;margin-bottom:40px;}
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;}
+.btn-primary{background:#fff;color:#1a1a1a;padding:14px 32px;font-size:13px;letter-spacing:2px;text-transform:uppercase;font-weight:700;text-decoration:none;transition:background .2s;}
+.btn-primary:hover{background:#e8e8e8;}
+.btn-secondary{border:1px solid rgba(255,255,255,.5);color:#fff;padding:14px 32px;font-size:13px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:all .2s;}
+.btn-secondary:hover{background:rgba(255,255,255,.1);}
+.hero-scroll{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.4);font-size:11px;letter-spacing:3px;text-align:center;z-index:2;}
+.hero-scroll::after{content:'';display:block;width:1px;height:40px;background:rgba(255,255,255,.3);margin:8px auto 0;}
+
+/* ── SECTIONS ── */
+section{padding:100px 40px;}
+.section-inner{max-width:1100px;margin:0 auto;}
+.section-tag{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#888;margin-bottom:16px;}
+.section-title{font-size:clamp(28px,4vw,48px);font-weight:300;line-height:1.2;margin-bottom:24px;}
+.section-title strong{font-weight:700;}
+.divider{width:48px;height:2px;background:#1a1a1a;margin-bottom:48px;}
+
+/* ── SOBRE ── */
+.sobre-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.sobre-img{aspect-ratio:4/5;overflow:hidden;}
+.sobre-img img{width:100%;height:100%;object-fit:cover;display:block;}
+.sobre-text p{font-size:16px;color:#444;line-height:1.9;margin-bottom:20px;}
+.sobre-nums{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px;}
+.num-item{border-top:2px solid #1a1a1a;padding-top:16px;}
+.num-val{font-size:36px;font-weight:700;margin-bottom:4px;}
+.num-label{font-size:12px;color:#888;letter-spacing:1px;text-transform:uppercase;}
+
+/* ── PROJETOS ── */
+.projetos{background:#f5f5f5;}
+.proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:48px;}
+.proj-card{position:relative;overflow:hidden;aspect-ratio:4/3;cursor:pointer;background:#ddd;}
+.proj-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s,filter .5s;}
+.proj-card:hover img{transform:scale(1.05);filter:brightness(.7);}
+.proj-info{position:absolute;bottom:0;left:0;right:0;padding:24px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.7));transform:translateY(10px);opacity:0;transition:all .3s;}
+.proj-card:hover .proj-info{opacity:1;transform:translateY(0);}
+.proj-tag{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:6px;}
+.proj-name{font-size:16px;font-weight:700;}
+.proj-loc{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;}
+.proj-card.destaque{grid-column:span 2;aspect-ratio:unset;}
+.proj-card.destaque img{height:420px;}
+
+/* ── EQUIPE ── */
+.equipe-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:48px;}
+.membro{text-align:center;}
+.membro-foto{width:100%;aspect-ratio:3/4;overflow:hidden;margin-bottom:20px;background:#f0f0f0;position:relative;}
+.membro-foto img{width:100%;height:100%;object-fit:cover;object-position:top;display:block;filter:grayscale(20%);}
+.membro-foto .sem-foto{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1a1a1a;color:#666;font-size:48px;}
+.membro-nome{font-size:18px;font-weight:700;margin-bottom:4px;}
+.membro-cargo{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:12px;}
+.membro-bio{font-size:14px;color:#555;line-height:1.7;}
+.membro-cau{font-size:11px;color:#aaa;margin-top:8px;font-family:monospace;}
+
+/* ── AVISO ESPECIAL ── */
+.aviso-valentina{grid-column:span 3;background:#fff8e1;border:1px solid #f0c040;padding:16px 20px;font-size:13px;color:#555;border-radius:2px;text-align:left;display:flex;gap:12px;align-items:flex-start;}
+.aviso-valentina .av-icon{font-size:20px;flex-shrink:0;}
+.aviso-valentina strong{color:#333;}
+
+/* ── PARCEIROS ── */
+.parceiros{background:#1a1a1a;color:#fff;}
+.parceiros .section-tag{color:#666;}
+.parceiros .section-title{color:#fff;}
+.parceiros .divider{background:#555;}
+.parc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;margin-top:48px;}
+.parc-item{border:1px solid #333;padding:28px;text-align:center;}
+.parc-item .parc-nome{font-size:13px;font-weight:700;letter-spacing:1px;margin-bottom:6px;}
+.parc-item .parc-area{font-size:11px;color:#666;letter-spacing:1px;text-transform:uppercase;}
+.parc-destaque{border-color:#555!important;background:rgba(255,255,255,.03);}
+
+/* ── CONTATO ── */
+.contato-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;}
+.contato-info{}
+.ci-item{display:flex;gap:16px;margin-bottom:28px;}
+.ci-icon{width:40px;height:40px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;}
+.ci-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#888;margin-bottom:4px;}
+.ci-val{font-size:15px;color:#1a1a1a;line-height:1.5;}
+.contato-form{}
+.cf-row{margin-bottom:20px;}
+.cf-row label{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#888;margin-bottom:8px;}
+.cf-row input,.cf-row textarea,.cf-row select{width:100%;background:#f8f8f8;border:1px solid #e0e0e0;padding:14px;font-size:14px;color:#1a1a1a;outline:none;transition:border .2s;font-family:inherit;}
+.cf-row input:focus,.cf-row textarea:focus{border-color:#1a1a1a;}
+.cf-row textarea{resize:vertical;min-height:120px;}
+.btn-submit{background:#1a1a1a;color:#fff;border:none;padding:14px 40px;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s;}
+.btn-submit:hover{background:#333;}
+
+/* ── FOOTER ── */
+footer{background:#111;color:#555;padding:32px 40px;text-align:center;}
+.footer-inner{max-width:1100px;margin:0 auto;}
+.footer-logo{font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#777;margin-bottom:8px;}
+.footer-copy{font-size:12px;line-height:1.8;}
+.footer-cnpj{font-size:11px;font-family:monospace;margin-top:4px;color:#444;}
+.footer-parceria{font-size:10px;color:#3a3a3a;margin-top:8px;letter-spacing:.5px;}
+
+/* ── MODAL PROJETO ── */
+.proj-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:center;justify-content:center;}
+.proj-modal-bg.open{display:flex;}
+.proj-modal{background:#fff;max-width:900px;width:94vw;max-height:90vh;overflow-y:auto;}
+.pm-img{width:100%;height:400px;object-fit:cover;display:block;}
+.pm-body{padding:40px;}
+.pm-tag{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#888;margin-bottom:8px;}
+.pm-title{font-size:28px;font-weight:700;margin-bottom:8px;}
+.pm-meta{display:flex;gap:24px;font-size:12px;color:#888;letter-spacing:.5px;margin-bottom:24px;flex-wrap:wrap;}
+.pm-desc{font-size:15px;color:#444;line-height:1.85;}
+.pm-close{float:right;margin-top:-4px;background:none;border:none;font-size:26px;cursor:pointer;color:#1a1a1a;}
+.pm-alerta{background:#fff3cd;border-left:3px solid #f0c040;padding:14px 16px;margin-top:24px;font-size:13px;color:#555;display:none;}
+
+@media(max-width:768px){
+  section{padding:70px 20px;}
+  .nav-links{display:none;}
+  .sobre-grid,.contato-grid{grid-template-columns:1fr;gap:40px;}
+  .proj-grid{grid-template-columns:1fr;}
+  .proj-card.destaque{grid-column:span 1;}
+  .proj-card.destaque img{height:260px;}
+  .equipe-grid{grid-template-columns:1fr 1fr;}
+  .parc-grid{grid-template-columns:1fr 1fr;}
+  .aviso-valentina{grid-column:span 2;}
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="#">
+      <div class="logo-mark"><svg viewBox="0 0 24 24"><polygon points="12,2 22,20 2,20"/></svg></div>
+      <div><div class="logo-text">Tavares A&D</div><div class="logo-sub">Arquitetura & Design</div></div>
+    </a>
+    <div class="nav-links">
+      <a href="#sobre">Sobre</a>
+      <a href="#projetos">Projetos</a>
+      <a href="#equipe">Equipe</a>
+      <a href="#contato" class="nav-cta">Contato</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Serrano, Rio Grande do Sul — desde 2018</div>
+    <h1 class="hero-title">Espaços que<br><strong>transformam</strong></h1>
+    <p class="hero-sub">Arquitetura residencial e comercial com identidade. Cada projeto é único — assim como quem vai vivê-lo.</p>
+    <div class="hero-btns">
+      <a href="#projetos" class="btn-primary">Ver Projetos</a>
+      <a href="#contato" class="btn-secondary">Fale Conosco</a>
+    </div>
+  </div>
+  <div class="hero-scroll">scroll</div>
+</div>
+
+<!-- Sobre -->
+<section id="sobre">
+  <div class="section-inner">
+    <div class="sobre-grid">
+      <div>
+        <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&h=1000&fit=crop" alt="Escritório" style="width:100%;height:520px;object-fit:cover;display:block;">
+      </div>
+      <div class="sobre-text">
+        <div class="section-tag">Sobre nós</div>
+        <h2 class="section-title">Construímos mais do que espaços. <strong>Construímos histórias.</strong></h2>
+        <div class="divider"></div>
+        <p>A Tavares Arquitetura & Design nasceu em 2018 com uma premissa simples: criar projetos que tenham alma. Fundada pelo arquiteto Lucas Renato Tavares, a empresa cresceu rapidamente no mercado gaúcho, atendendo clientes residenciais e corporativos que buscam excelência e identidade visual coesa.</p>
+        <p>Nosso trabalho integra arquitetura, design de interiores e identidade visual — entregando soluções completas para que nossos clientes não precisem dividir sua visão entre diferentes profissionais.</p>
+        <p>Com uma carteira diversificada que inclui projetos residenciais de alto padrão, reformas comerciais e infraestrutura logística, a Tavares A&D consolidou-se como uma das referências do setor no interior gaúcho.</p>
+        <div class="sobre-nums">
+          <div class="num-item"><div class="num-val">47+</div><div class="num-label">Projetos entregues</div></div>
+          <div class="num-item"><div class="num-val">6</div><div class="num-label">Anos de mercado</div></div>
+          <div class="num-item"><div class="num-val">R$2,1M</div><div class="num-label">Faturamento 2024</div></div>
+          <div class="num-item"><div class="num-val">3 estados</div><div class="num-label">Projetos ativos</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Projetos -->
+<section id="projetos" class="projetos">
+  <div class="section-inner">
+    <div class="section-tag">Portfólio</div>
+    <h2 class="section-title">Nossos <strong>projetos</strong></h2>
+    <div class="divider"></div>
+    <div class="proj-grid">
+
+      <div class="proj-card destaque" onclick="openProj(0)">
+        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1000&h=600&fit=crop" alt="">
+        <div class="proj-info">
+          <div class="proj-tag">Residencial · 2024</div>
+          <div class="proj-name">Residência Alto da Serra</div>
+          <div class="proj-loc">Serrano, RS — 380m²</div>
+        </div>
+      </div>
+
+      <div class="proj-card" onclick="openProj(1)">
+        <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&h=450&fit=crop" alt="">
+        <div class="proj-info">
+          <div class="proj-tag">Comercial · 2024</div>
+          <div class="proj-name">Café Serenidade</div>
+          <div class="proj-loc">Serrano, RS — Projeto completo</div>
+        </div>
+      </div>
+
+      <div class="proj-card" onclick="openProj(2)">
+        <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&h=450&fit=crop" alt="">
+        <div class="proj-info">
+          <div class="proj-tag">Corporativo · 2023</div>
+          <div class="proj-name">Centro Empresarial Meridional</div>
+          <div class="proj-loc">São Leopoldo, RS</div>
+        </div>
+      </div>
+
+      <div class="proj-card" onclick="openProj(3)">
+        <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?w=600&h=450&fit=crop" alt="">
+        <div class="proj-info">
+          <div class="proj-tag">Industrial · 2022</div>
+          <div class="proj-name">Complexo de Armazenagem</div>
+          <div class="proj-loc">Interior RS — Cliente Confidencial</div>
+        </div>
+      </div>
+
+      <div class="proj-card" onclick="openProj(4)">
+        <img src="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=600&h=450&fit=crop" alt="">
+        <div class="proj-info">
+          <div class="proj-tag">Comercial · 2023</div>
+          <div class="proj-name">Reforma Comercial Centro</div>
+          <div class="proj-loc">Porto Alegre, RS — 220m²</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Equipe -->
+<section id="equipe">
+  <div class="section-inner">
+    <div class="section-tag">Nossa equipe</div>
+    <h2 class="section-title">As pessoas por trás dos <strong>projetos</strong></h2>
+    <div class="divider"></div>
+    <div class="equipe-grid">
+
+      <div class="membro">
+        <div class="membro-foto"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=530&fit=crop&crop=face" alt="Lucas Tavares"></div>
+        <div class="membro-nome">Lucas Renato Tavares</div>
+        <div class="membro-cargo">Sócio-Diretor · Arquiteto</div>
+        <div class="membro-bio">Formado pela UFRGS (2010), com especialização em Design Urbano pela USP. Fundador da empresa e responsável pela direção criativa de todos os projetos. Membro ativo do CAU/RS.</div>
+        <div class="membro-cau">CAU/RS A-47.832-1</div>
+      </div>
+
+      <div class="membro">
+        <div class="membro-foto" style="background:#f8f4f0;">
+          <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=530&fit=crop&crop=face" alt="Valentina Carmo" style="filter:grayscale(0%);">
+        </div>
+        <div class="membro-nome">Valentina Carmo</div>
+        <div class="membro-cargo">Designer Gráfica · Colaboradora</div>
+        <div class="membro-bio">Designer gráfica responsável pela identidade visual dos projetos e materiais de comunicação da empresa e de clientes. Parceria iniciada em 2023.</div>
+        <div class="membro-cau" style="color:#b03030;">⚠ Colaboradora — status: afastamento não comunicado (desde 07/03/2025)</div>
+      </div>
+
+      <div class="membro">
+        <div class="membro-foto"><div class="sem-foto">?</div></div>
+        <div class="membro-nome">H. Caldas</div>
+        <div class="membro-cargo">Consultor Estratégico · Sócio</div>
+        <div class="membro-bio">Responsável pelo desenvolvimento de negócios e parcerias estratégicas com clientes corporativos e investidores. Atua nos bastidores da operação.</div>
+        <div class="membro-cau" style="color:#aaa;">Sem registro profissional público</div>
+      </div>
+
+      <div class="aviso-valentina">
+        <div class="av-icon">📌</div>
+        <div>
+          <strong>Aviso interno (não público):</strong> A colaboradora Valentina Carmo não compareceu ao trabalho desde 07/03/2025 e não comunicou afastamento. Tentativas de contato sem retorno. A página está sendo mantida temporariamente até regularização da situação.
+          <span style="display:block;margin-top:4px;font-size:11px;color:#888;">Registrado por: L.R.T — 10/03/2025 10:22</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Parceiros -->
+<section class="parceiros">
+  <div class="section-inner">
+    <div class="section-tag">Parceiros</div>
+    <h2 class="section-title">Quem <strong>confiamos</strong></h2>
+    <div class="divider"></div>
+    <div class="parc-grid">
+      <div class="parc-item">
+        <div class="parc-nome">Construtora Almeida</div>
+        <div class="parc-area">Construção civil</div>
+      </div>
+      <div class="parc-item">
+        <div class="parc-nome">Studio Möbel RS</div>
+        <div class="parc-area">Mobiliário sob medida</div>
+      </div>
+      <div class="parc-item parc-destaque">
+        <div class="parc-nome" style="color:#888;">Meridional Const. & Serv.</div>
+        <div class="parc-area">Infraestrutura industrial</div>
+        <div style="font-size:10px;color:#555;margin-top:8px;letter-spacing:.5px;">CNPJ: 47.832.***/0001-**</div>
+      </div>
+      <div class="parc-item">
+        <div class="parc-nome">Engeflex Projetos</div>
+        <div class="parc-area">Engenharia estrutural</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contato -->
+<section id="contato">
+  <div class="section-inner">
+    <div class="contato-grid">
+      <div class="contato-info">
+        <div class="section-tag">Contato</div>
+        <h2 class="section-title">Vamos <strong>conversar</strong></h2>
+        <div class="divider"></div>
+        <div class="ci-item">
+          <div class="ci-icon">📍</div>
+          <div>
+            <div class="ci-label">Endereço</div>
+            <div class="ci-val">R. Borges de Medeiros, 1124, Sala 401<br>Centro — Serrano/RS — CEP 95.620-000</div>
+          </div>
+        </div>
+        <div class="ci-item">
+          <div class="ci-icon">📞</div>
+          <div>
+            <div class="ci-label">Telefone / WhatsApp</div>
+            <div class="ci-val">(54) 3241-7700<br>(54) 99341-7700</div>
+          </div>
+        </div>
+        <div class="ci-item">
+          <div class="ci-icon">✉</div>
+          <div>
+            <div class="ci-label">E-mail</div>
+            <div class="ci-val">contato@tavares-ad.com.br<br>lucas@tavares-ad.com.br</div>
+          </div>
+        </div>
+        <div class="ci-item">
+          <div class="ci-icon">⏰</div>
+          <div>
+            <div class="ci-label">Horário de atendimento</div>
+            <div class="ci-val">Segunda a sexta: 9h às 18h<br><span style="color:#aaa;font-size:13px;">Atendimento presencial ou remoto</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="contato-form">
+        <div class="cf-row">
+          <label>Nome completo</label>
+          <input type="text" placeholder="Seu nome">
+        </div>
+        <div class="cf-row">
+          <label>E-mail</label>
+          <input type="email" placeholder="seu@email.com">
+        </div>
+        <div class="cf-row">
+          <label>Tipo de projeto</label>
+          <select>
+            <option>Residencial</option>
+            <option>Comercial</option>
+            <option>Industrial / Logístico</option>
+            <option>Identidade Visual</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div class="cf-row">
+          <label>Mensagem</label>
+          <textarea placeholder="Conte-nos sobre seu projeto..."></textarea>
+        </div>
+        <button class="btn-submit">Enviar mensagem</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Tavares Arquitetura & Design</div>
+    <div class="footer-copy">
+      R. Borges de Medeiros, 1124, Sala 401 — Centro, Serrano/RS &nbsp;|&nbsp; (54) 3241-7700 &nbsp;|&nbsp; @tavares.arq.design<br>
+      © 2025 Tavares Arquitetura & Design Ltda. Todos os direitos reservados.
+    </div>
+    <div class="footer-cnpj">CNPJ: 32.847.***/0001-** &nbsp;·&nbsp; CAU/RS A-47.832-1</div>
+    <div class="footer-parceria">Infraestrutura e logística em parceria com Meridional Construções e Serviços Ltda. (CNPJ 47.832.***/0001-**)</div>
+  </div>
+</footer>
+
+<!-- Modal Projetos -->
+<div class="proj-modal-bg" id="pmb" onclick="if(event.target===this)closePM()">
+  <div class="proj-modal">
+    <img class="pm-img" id="pm-img" src="" alt="">
+    <div class="pm-body">
+      <button class="pm-close" onclick="closePM()">×</button>
+      <div class="pm-tag" id="pm-tag"></div>
+      <div class="pm-title" id="pm-title"></div>
+      <div class="pm-meta" id="pm-meta"></div>
+      <div class="pm-desc" id="pm-desc"></div>
+      <div class="pm-alerta" id="pm-alerta"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PROJETOS=[
+  {
+    img:'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=900&h=500&fit=crop',
+    tag:'Residencial · Alto Padrão',
+    title:'Residência Alto da Serra',
+    meta:['Serrano, RS','2024','380m² de área construída','Prazo: 14 meses'],
+    desc:'Projeto residencial de alto padrão desenvolvido para casal com dois filhos. A proposta integrava área social ampla, home office e paisagismo com espécies nativas. Identidade visual do projeto e memorial descritivo desenvolvidos por Valentina Carmo.',
+    alerta:false
+  },
+  {
+    img:'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=900&h=500&fit=crop',
+    tag:'Comercial · Interiores + Identidade Visual',
+    title:'Café Serenidade — Projeto Integrado',
+    meta:['Serrano, RS','2024','95m² + identidade visual completa','Cliente: Paulo Renato Maia'],
+    desc:'Projeto completo para café boutique no centro de Serrano. Integrou arquitetura de interiores, mobiliário sob medida e identidade visual desenvolvida internamente. O manual de identidade visual ("Café Serenidade — Identidade Visual v3") foi o último arquivo aberto no laptop da designer Valentina Carmo antes de seu desaparecimento.',
+    alerta:true,
+    alertaTxt:'⚠ NOTA INVESTIGATIVA: O arquivo "Café Serenidade — Identidade Visual v3" foi encontrado aberto no laptop de Valentina Carmo (EVID-003). Este era seu projeto em andamento no dia do desaparecimento.'
+  },
+  {
+    img:'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=900&h=500&fit=crop',
+    tag:'Corporativo · Infraestrutura',
+    title:'Centro Empresarial Meridional',
+    meta:['São Leopoldo, RS','2023','1.240m²','Cliente: Meridional Const. e Serv. Ltda.'],
+    desc:'Projeto corporativo de grande porte para sede administrativa do grupo Meridional. Inclui salas de reunião, centro de operações e área de convivência. Cliente: Meridional Construções e Serviços Ltda., CNPJ 47.832.***/0001-**, representada por H. Caldas. Maior projeto da empresa em termos de valor contratual.',
+    alerta:true,
+    alertaTxt:'⚠ NOTA INVESTIGATIVA: A empresa "Meridional Construções e Serviços Ltda." aparece nos extratos bancários de Valentina Carmo (EVID-007) e nos registros empresariais da Tavares A&D. Seu titular é HENRIQUE CALDAS — identificado como "H. Caldas, Consultor Estratégico" na equipe desta empresa.'
+  },
+  {
+    img:'https://images.unsplash.com/photo-1553413077-190dd305871c?w=900&h=500&fit=crop',
+    tag:'Industrial · Logística',
+    title:'Complexo de Armazenagem — Cliente Confidencial',
+    meta:['Interior RS — Localização não divulgada','2022','3.800m² de área coberta','Cliente: Confidencial'],
+    desc:'Projeto de galpões industriais para armazenagem e logística. Por cláusula de confidencialidade, o cliente não é divulgado publicamente. O projeto envolveu três galpões independentes com acesso restrito, sistema de vigilância integrado e vias de acesso dedicadas. Desenvolvido em parceria com a Meridional Construções e Serviços Ltda.',
+    alerta:true,
+    alertaTxt:'⚠ NOTA INVESTIGATIVA: Projeto de localização não divulgada, com cliente confidencial e sistema de vigilância. Desenvolvido com a Meridional. O corpo de Valentina Carmo foi encontrado em propriedade da "Meridional Logística e Armazenagem Ltda." no km 23 da RSC-287 (EVID-010 — Fase 4).'
+  },
+  {
+    img:'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=900&h=500&fit=crop',
+    tag:'Comercial · Reforma',
+    title:'Reforma Comercial — Rua da Praia',
+    meta:['Porto Alegre, RS','2023','220m²','Prazo: 6 meses'],
+    desc:'Reforma completa de espaço comercial no centro de Porto Alegre. Projeto incluiu adequação de acessibilidade, atualização de fachada e novo layout interno.',
+    alerta:false
+  }
+];
+
+function openProj(i){
+  const p=PROJETOS[i];
+  document.getElementById('pm-img').src=p.img;
+  document.getElementById('pm-tag').textContent=p.tag;
+  document.getElementById('pm-title').textContent=p.title;
+  document.getElementById('pm-meta').innerHTML=p.meta.map(m=>`<span>${m}</span>`).join('');
+  document.getElementById('pm-desc').textContent=p.desc;
+  const al=document.getElementById('pm-alerta');
+  if(p.alerta){al.style.display='block';al.textContent=p.alertaTxt;}
+  else{al.style.display='none';}
+  document.getElementById('pmb').classList.add('open');
+}
+function closePM(){document.getElementById('pmb').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePM();});
+</script>
+</body>
+</html>
